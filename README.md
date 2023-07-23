@@ -13,6 +13,8 @@ I want to create sync DB for Blueskye or Twitter etc...
 
 - [Bluesky](https://bsky.app/)
 
+:memo: `bluenotiondb` is suitable for immutable data like Bluesky. Mutable data like Note app is not suitable for `bluenotiondb`.
+
 ## Usage
 
 We have provided `bluenotiondb` as single binary for GitHub Actions's `ubuntu-latest`.
