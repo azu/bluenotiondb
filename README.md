@@ -12,7 +12,7 @@ We have provided `bluenotiondb` as single binary.
 
 - Latest release: <https://github.com/azu/bluenotiondb/releases/latest>
 
-You can run `bluenotiondb` with the following environment variables:
+You can download `bluenotiondb` and run it with the following environment variables:
 
 - `BLUE_NOTION_ENVS`: JSON string of `Env` type
 
