@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>bluenotiondb env generator</title>
+    <style>
+        .app {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        /*  fit width */
+        input {
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+        }
+
+        details {
+            margin-top: 1em;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <p>This page does not send any input to servers</p>
+
+    <div>
+        <h2>Notion Config</h2>
+        <label for="notion_api_key">Notion API key:</label><br>
+        <input type="text" id="notion_api_key"
+               name="notion_api_key"
+               placeholder="secret_xxxx"><br>
+        <label for="notion_database_id">Notion Database Id:</label><br>
+        <input type="text" id="notion_database_id"
+               name="notion_database_id"
+               placeholder="xxxxx"><br>
+    </div>
+    <div>
+        <h2>Bluesky Config</h2>
+        <label for="bluesky_identifier">BlueSky Idenfier:</label><br>
+        <input type="text" id="bluesky_identifier"
+               name="bluesky_identifier"
+               placeholder="xxxxx.bsky.app"><br>
+        <label for="bluesky_app_password">BlueSky App password:</label><br>
+        <input type="text" id="bluesky_app_password"
+               name="bluesky_app_password"
+               placeholder="xxx-xxx-xxx"><br>
+    </div>
+    <div>
+        <h2>Generated env</h2>
+        <textarea id="generated_env" cols="30" rows="10" readonly></textarea>
+    </div>
+</div>
+<script>
+    const targetInputIds = [
+        'notion_database_id',
+        'notion_api_key',
+        'bluesky_identifier',
+        'bluesky_app_password'
+    ];
+
+    const generated_env = document.getElementById('generated_env');
+    // click to copy
+    generated_env.addEventListener('click', () => {
+        navigator.clipboard.writeText(generated_env.value).then(() => {
+            alert('copied: ' + generated_env.value);
+        });
+    });
+    const onChange = () => {
+        const env = {};
+        targetInputIds.forEach((id) => {
+            const input = document.getElementById(id);
+            env[id] = input.value;
+        });
+        generated_env.value = "BLUE_NOTION_ENVS='" + JSON.stringify([env]) + "'"
+    }
+    targetInputIds.forEach((id) => {
+        const input = document.getElementById(id);
+        input.addEventListener('change', onChange);
+    });
+</script>
+</body>
+</html>
