@@ -51,6 +51,6 @@ jobs:
                   - name: Update
                     run: ./bluenotiondb
                     env:
-                      BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+                      BLUE_NOTION_ENVS: ${{ '${{secrets.BLUE_NOTION_ENVS}}' }}
             ```
 
