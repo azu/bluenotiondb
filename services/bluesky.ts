@@ -3,6 +3,7 @@ import { AppBskyFeedGetAuthorFeed } from "@atproto/api";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ServiceItem } from "../common/Interface.js";
 import { NotionEnv } from "../notion/Notion.js";
+import { errorLog, log } from "../common/logger.js";
 
 export type BlueSkyEnv = {
     bluesky_identifier: string;
@@ -47,7 +48,9 @@ export const collectTweetsUntil = async (timeline: ServiceItem[], lastTweet: Ser
             }
         }
     } catch (error) {
-        console.log("collect error", error);
+        errorLog(new Error("collect error", {
+            cause: error,
+        }));
     }
     return results;
 };
@@ -101,6 +104,10 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
             throw new Error("timeline fetch error:" + JSON.stringify(timeline.data));
         }
     };
+
+    log("fetching from bluesky since %s", lastServiceItem?.unixTimeMs !== undefined
+        ? new Date(lastServiceItem.unixTimeMs).toISOString()
+        : "first");
     const feed = await fetchAuthorFeed({
         actor: env.bluesky_identifier,
         feed: []
@@ -111,8 +118,8 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
     const sortedPosts = convertedPosts.sort((a, b) => {
         return a.unixTimeMs > b.unixTimeMs ? -1 : 1;
     });
-    console.info("fetched item count", sortedPosts.length);
+    log("fetched item count", sortedPosts.length);
     const postItems = lastServiceItem ? await collectTweetsUntil(sortedPosts, lastServiceItem) : sortedPosts;
-    console.info("post-able items count", postItems.length);
+    log("post-able items count", postItems.length);
     return postItems;
 }
