@@ -15,7 +15,7 @@ I want to create sync DB for Blueskye or Twitter etc...
 
 ## Usage
 
-We have provided `bluenotiondb` as single binary for GitHub Actions' `ubuntu-latest`.
+We have provided `bluenotiondb` as single binary for GitHub Actions's `ubuntu-latest`.
 
 - Latest release: <https://github.com/azu/bluenotiondb/releases/latest>
 
