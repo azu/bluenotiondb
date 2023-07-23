@@ -4,6 +4,7 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
+    "test": "bun run ./index.ts",
     "dist": "bun build ./index.ts --compile --outfile bluenotiondb"
   },
   "devDependencies": {
