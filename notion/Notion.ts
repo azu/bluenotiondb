@@ -1,12 +1,20 @@
 import { Client, LogLevel } from "@notionhq/client";
-import type { ServiceIR } from "../common/Interface.js";
+import type { ServiceItem } from "../common/Interface.js";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints.js";
 
 export type NotionEnv = {
     notion_database_id: string;
     notion_api_key: string;
 }
-export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceIR> => {
+export const assertNotionEnv = (env: any): void => {
+    if (env.notion_database_id === undefined) {
+        throw new Error("env.notion_database_id is undefined");
+    }
+    if (env.notion_api_key === undefined) {
+        throw new Error("env.notion_api_key is undefined");
+    }
+}
+export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem> => {
     const notion = new Client({
         auth: env.notion_api_key,
         logLevel: LogLevel.ERROR,
@@ -37,7 +45,7 @@ export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceIR> =
         }
     }
 }
-export const createPage = async (env: NotionEnv, ir: ServiceIR) => {
+export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
     const notion = new Client({
         auth: env.notion_api_key,
         logLevel: LogLevel.DEBUG,
@@ -57,7 +65,7 @@ export const createPage = async (env: NotionEnv, ir: ServiceIR) => {
     });
 };
 
-export const syncToNotion = async (env: NotionEnv, irs: ServiceIR[]) => {
+export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
     let count = 0;
     for (const ir of irs) {
         try {

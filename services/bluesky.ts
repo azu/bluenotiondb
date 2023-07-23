@@ -1,15 +1,19 @@
 import { BskyAgent } from "@atproto/api";
 import { AppBskyFeedGetAuthorFeed } from "@atproto/api";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
-import { ServiceIR } from "../common/Interface.js";
+import { ServiceItem } from "../common/Interface.js";
+import { NotionEnv } from "../notion/Notion.js";
 
 export type BlueSkyEnv = {
     bluesky_identifier: string;
     bluesky_app_password: string;
 
+} & NotionEnv;
+export const isBlueSkyEnv = (env: unknown): env is BlueSkyEnv => {
+    return (env as BlueSkyEnv).bluesky_identifier !== undefined && (env as BlueSkyEnv).bluesky_app_password !== undefined;
 }
 // Issue: https://github.com/bluesky-social/atproto/issues/910
-export const convertPostToServiceIr = (post: PostView): ServiceIR => {
+export const convertPostToServiceIr = (post: PostView): ServiceItem => {
     const record = post.record as { text?: string };
     if (typeof record.text !== "string") {
         throw new Error("post.record.text is not string");
@@ -29,8 +33,8 @@ export const convertPostToServiceIr = (post: PostView): ServiceIR => {
 };
 
 type Feed = AppBskyFeedGetAuthorFeed.Response["data"]["feed"];
-export const collectTweetsUntil = async (timeline: ServiceIR[], lastTweet: ServiceIR): Promise<ServiceIR[]> => {
-    const results: ServiceIR[] = [];
+export const collectTweetsUntil = async (timeline: ServiceItem[], lastTweet: ServiceItem): Promise<ServiceItem[]> => {
+    const results: ServiceItem[] = [];
     try {
         for (const tweet of timeline) {
             if (lastTweet.url === tweet.url) {
@@ -48,7 +52,7 @@ export const collectTweetsUntil = async (timeline: ServiceIR[], lastTweet: Servi
     return results;
 };
 
-export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceIR | null): Promise<ServiceIR[]> {
+export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> {
     const agent = new BskyAgent({
         service: "https://bsky.social"
     });
