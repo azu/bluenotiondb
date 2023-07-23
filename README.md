@@ -43,7 +43,7 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 env:
-  BLUE_NOTION_VERSION: v0.1.0
+  BLUE_NOTION_VERSION: v0.1.0 # see https://github.com/azu/bluenotiondb/releases/latest
 
 permissions:
   contents: none
