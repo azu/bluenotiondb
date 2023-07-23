@@ -8,7 +8,7 @@ env:
   BLUE_NOTION_VERSION: v0.1.0
 
 permissions:
-  contents: read
+  contents: none
 jobs:
   update:
     runs-on: ubuntu-latest
