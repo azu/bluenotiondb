@@ -88,10 +88,19 @@ To install dependencies:
 bun install
 ```
 
+To use local env:
+
+1. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+2. Crate `.env` file and paste `BLUE_NOTION_ENVS` to `.env`
+
+```bash
+BLUE_NOTION_ENVS='[...]'
+````
+
 To run:
 
 ```bash
-bun run index.ts
+bun run main
 ```
 
 This project was created using `bun init` in bun v0.6.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
