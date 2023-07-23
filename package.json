@@ -2,7 +2,7 @@
   "name": "bluenotiondb",
   "module": "index.ts",
   "type": "module",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "scripts": {
     "main": "DEBUG=1 bun run ./index.ts",
     "dist": "bun build ./index.ts --compile --outfile bluenotiondb"
