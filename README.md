@@ -4,14 +4,14 @@ Sync any service to Notion.
 
 ## Architecture
 
-1. Pull Service
-2. Convert to ServiceIR
-3. Push ServiceIR to Notion
+1. Fetch posts from Service
+2. Convert post to ServiceItem
+3. Push ServiceItem to Notion
 
 ```mermaid
 graph LR
-    A[Pull Service] --> B[Convert to ServiceIR]
-    B --> C[Push ServiceIR to Notion]
+    A[Fetch Service] --> B[Convert to ServiceItem]
+    B --> C[Push ServiceItem to Notion]
 ```
 
 If you want to support a new service, you need to implement the following:
