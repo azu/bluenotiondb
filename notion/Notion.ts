@@ -17,7 +17,7 @@ export const assertNotionEnv = (env: any): void => {
 export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem> => {
     const notion = new Client({
         auth: env.notion_api_key,
-        logLevel: LogLevel.ERROR,
+        logLevel: LogLevel.WARN,
     });
     const queryDatabaseResponsePromise = await notion.databases.query({
         database_id: env.notion_database_id,
@@ -48,7 +48,7 @@ export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem>
 export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
     const notion = new Client({
         auth: env.notion_api_key,
-        logLevel: LogLevel.DEBUG,
+        logLevel: LogLevel.WARN,
     });
 
     return notion.pages.create({
