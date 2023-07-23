@@ -1,13 +1,11 @@
 name: Update
 on:
-  push:
-    branches:
-      - master
-      - main
   schedule:
     # every 1 hour
     - cron: '0 * * * *'
   workflow_dispatch:
+env:
+  BLUE_NOTION_VERSION: v0.1.0
 
 permissions:
   contents: read
@@ -15,13 +13,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: "0.7.0"
-      - name: Install
-        run: bun install
+      - name: Download
+        run: |
+          curl https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          chmod +x bluenotiondb
       - name: Update
-        run: bun run index.ts
+        run: bluenotiondb
         env:
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
