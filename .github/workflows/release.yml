@@ -20,6 +20,38 @@ jobs:
         run: bun install
       - name: Update
         run: bun run dist
+      - name: Get Tag Name
+        id: get_tag_name
+        run: echo ::set-output name=tag_name::${GITHUB_REF#refs/*/}
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "bluenotiondb"
+          body: |
+            Usage of ${{ steps.get_tag_name.outputs.tag_name }}
+            
+            ```yaml
+            name: Update
+            on:
+              schedule:
+                # every 30 minutes
+                - cron: "*/30 * * * *"
+              workflow_dispatch:
+            env:
+              BLUE_NOTION_VERSION: ${{steps.get_tag_name.outputs.tag_name}}
+            
+            permissions:
+              contents: none
+            jobs:
+              update:
+                runs-on: ubuntu-latest
+                steps:
+                  - name: Download
+                    run: |
+                      curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+                      chmod +x bluenotiondb
+                  - name: Update
+                    run: ./bluenotiondb
+                    env:
+                      BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+            ```
+
