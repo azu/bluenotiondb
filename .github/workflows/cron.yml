@@ -18,6 +18,6 @@ jobs:
           curl https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
-        run: bluenotiondb
+        run: ./bluenotiondb
         env:
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
