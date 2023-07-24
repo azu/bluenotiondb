@@ -109,6 +109,15 @@ bun run main
 
 This project was created using `bun init` in bun v0.6.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
 
+
+## Debug
+
+You can use `DEBUG` env to debug.
+
+```bash
+DEBUG=1 ./bluenotiondb
+```
+
 ## Release Flow
 
 ```
