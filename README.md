@@ -61,6 +61,10 @@ jobs:
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
 ```
 
+## Related
+
+- [azu/mytweets: Search all your tweets of Twitter/Bluesky](https://github.com/azu/mytweets)
+
 ## Architecture
 
 1. Fetch posts from Service
@@ -111,3 +115,7 @@ This project was created using `bun init` in bun v0.6.0. [Bun](https://bun.sh) i
 npm version {patch,minor,major}
 git push --follow-tags
 ```
+
+## License
+
+MIT
