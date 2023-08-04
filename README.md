@@ -18,17 +18,20 @@ I want to create sync DB for Bluesky or Twitter etc...
 
 ## Usage
 
-We have provided `bluenotiondb` as single binary for GitHub Actions's `ubuntu-latest`.
+## Setup Notion
 
-- Latest release: <https://github.com/azu/bluenotiondb/releases/latest>
-
-You can download `bluenotiondb` and run it with the following environment variables:
-
-- `BLUE_NOTION_ENVS`: JSON string of `Env` type
-
-You can create `BLUE_NOTION_ENVS` on generator tool:
-
-- <https://azu.github.io/bluenotiondb/>
+1. Create Notion Database
+2. Add Following Columns with type
+    - `Title`: title column
+    - `URL`: URL type column
+    - `Date`: Date type column
+    - `Type`: Select type column
+        - Type will be service name
+    - ![img.png](docs/img.png)
+3. Create Notion Integration
+    - <https://www.notion.so/my-integrations>
+4. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+    - <https://azu.github.io/bluenotiondb/>
 
 ### via CLI
 
@@ -39,7 +42,7 @@ $ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
 ### via GitHub Actions
 
 1. Create GitHub repository
-2. Put `.github/workflows/update.yml` to the repository 
+2. Put `.github/workflows/update.yml` to the repository
 3. Copy from <https://github.com/azu/bluenotiondb/releases/latest> and Paste to `.github/workflows/update.yml`
 4. Set `BLUE_NOTION_ENVS` to GitHub repository secret
 
@@ -120,7 +123,6 @@ bun run main
 ```
 
 This project was created using `bun init` in bun v0.6.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
-
 
 ## Debug
 
