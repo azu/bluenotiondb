@@ -34,13 +34,19 @@ export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem>
         return null
     } else {
         const result = queryDatabaseResponsePromise.results[0] as PageObjectResponse;
+        // Notion Date does not have seconds
+        // Adjust 1min to avoid duplication
+        // @ts-ignore
+        const startDate = new Date(result.properties.Date.date.start);
+        const adjustedStartDate = new Date(startDate.getTime() + 1000 * 60);
         return {
+            //@ts-ignore
+            type: result.properties.Type?.select?.name,
             //@ts-ignore
             url: result.properties.URL.url,
             //@ts-ignore
-            title: result.properties.Title.title[0].text.content,
-            //@ts-ignore
-            unixTimeMs: new Date(result.properties.Date.date.start).getTime(),
+            title: result.properties.Title.title?.[0]?.text?.content,
+            unixTimeMs: adjustedStartDate.getTime(),
 
         }
     }
@@ -50,12 +56,19 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
         auth: env.notion_api_key,
         logLevel: LogLevel.WARN,
     });
-
     return notion.pages.create({
         parent: { database_id: env.notion_database_id },
         properties: {
             Title: {
-                title: [{ text: { content: ir.title } }],
+                title: typeof ir.title === "string"
+                    ? [{
+                        type: "text",
+                        text: { content: ir.title }
+                    }]
+                    : ir.title,
+            },
+            Type: {
+                select: { name: ir.type },
             },
             Date: {
                 date: { start: new Date(ir.unixTimeMs).toISOString() },
@@ -69,7 +82,7 @@ export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
     let count = 0;
     for (const ir of irs) {
         try {
-            console.info(`syncing ${count++}/${irs.length} - ${ir.url}`);
+            console.info(`syncing ${count++}/${irs.length}`);
             await createPage(env, ir);
         } catch (e) {
             console.error(e);

@@ -1,7 +1,8 @@
 import { BlueSkyEnv } from "../services/bluesky.js";
 import { assertNotionEnv } from "./Notion.js";
+import { GitHubSearchEnv } from "../services/github_search.js";
 
-export type SupportedEnv = BlueSkyEnv;
+export type SupportedEnv = BlueSkyEnv | GitHubSearchEnv;
 export const parserEnvs = () => {
     const env = process.env.BLUE_NOTION_ENVS;
     if (env === undefined) {

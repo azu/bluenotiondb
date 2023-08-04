@@ -3,18 +3,21 @@ import { fetchLastPage, syncToNotion } from "./notion/Notion.js";
 import { parserEnvs, SupportedEnv } from "./notion/envs.js";
 import { ServiceItem } from "./common/Interface.js";
 import { debug, log } from "./common/logger.js";
+import { fetchGitHubSearch, isGitHubSearchEnv } from "./services/github_search.js";
 
 const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
     if (isBlueSkyEnv(env)) {
         return fetchBluesky(env, lastItem);
+    } else if (isGitHubSearchEnv(env)) {
+        return fetchGitHubSearch(env, lastItem);
     }
-    throw new Error("unsupported env type" + JSON.stringify(env));
+    throw new Error("unsupported env");
 }
 const envs = parserEnvs();
+const lastItem = await fetchLastPage(envs[0]);
+log("last item exists: %s", lastItem ? "true" : "false");
+debug("lastItem object", lastItem);
 for (const env of envs) {
-    const lastItem = await fetchLastPage(env);
-    log("last item exists: %s", lastItem ? "true" : "false");
-    debug("lastItem object", lastItem);
     const postableItems = await fetchService(env, lastItem);
     // sync to notion
     await syncToNotion(env, postableItems);

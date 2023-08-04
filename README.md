@@ -12,8 +12,9 @@ I want to create sync DB for Bluesky or Twitter etc...
 ## Supported Services
 
 - [Bluesky](https://bsky.app/)
-
-:memo: `bluenotiondb` is suitable for immutable data like Bluesky. Mutable data like Note app is not suitable for `bluenotiondb`.
+    - Pull Posts from Bluesky and push to Notion
+- [GitHub Search](https://github.com/search)
+    - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
 
 ## Usage
 
@@ -28,6 +29,12 @@ You can download `bluenotiondb` and run it with the following environment variab
 You can create `BLUE_NOTION_ENVS` on generator tool:
 
 - <https://azu.github.io/bluenotiondb/>
+
+### via CLI
+
+```bash
+$ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
+```
 
 ### via GitHub Actions
 
