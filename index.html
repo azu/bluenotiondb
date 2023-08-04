@@ -26,7 +26,8 @@
 <body>
 <div class="app">
     <h1>bluenotiondb env generator</h1>
-    <p><a title="azu/bluenotiondb: Sync Bluesky to Notion." href="https://github.com/azu/bluenotiondb">azu/bluenotiondb: Sync Bluesky to Notion.</a></p>
+    <p><a title="azu/bluenotiondb: Sync Bluesky to Notion." href="https://github.com/azu/bluenotiondb">azu/bluenotiondb:
+        Sync Bluesky to Notion.</a></p>
     <p>This page does not send any input to servers</p>
     <div>
         <h2>Notion Config</h2>
@@ -41,7 +42,7 @@
     </div>
     <div>
         <h2>Bluesky Config</h2>
-        <label for="bluesky_identifier">BlueSky Idenfier:</label><br>
+        <label for="bluesky_identifier">BlueSky Identifier:</label><br>
         <input type="text" id="bluesky_identifier"
                name="bluesky_identifier"
                placeholder="xxxxx.bsky.app"><br>
@@ -51,16 +52,37 @@
                placeholder="xxx-xxx-xxx"><br>
     </div>
     <div>
+        <h2>GitHub Config</h2>
+        <label for="github_token">GitHub Token:</label><br>
+        <input type="text" id="github_token"
+               name="github_token"
+               placeholder="ghp-xxxx-xxxx-xxxx"><br>
+        <label for="github_search_query">GitHub Search query:</label><br>
+        <input type="text" id="github_search_query"
+               name="github_search_query"
+               placeholder="involves:@me"><br>
+    </div>
+    <div>
         <h2>Generated env(click and copy)</h2>
         <textarea id="generated_env" cols="30" rows="10" readonly></textarea>
     </div>
 </div>
 <script>
-    const targetInputIds = [
-        'notion_database_id',
-        'notion_api_key',
-        'bluesky_identifier',
-        'bluesky_app_password'
+    const targetInputSets = [
+        // Bluesky
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'bluesky_identifier',
+            'bluesky_app_password',
+        ],
+        // GitHub
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'github_token',
+            'github_search_query',
+        ]
     ];
 
     const generated_env = document.getElementById('generated_env');
@@ -71,14 +93,24 @@
         });
     });
     const onChange = () => {
-        const env = {};
-        targetInputIds.forEach((id) => {
-            const input = document.getElementById(id);
-            env[id] = input.value;
-        });
-        generated_env.value = "BLUE_NOTION_ENVS='" + JSON.stringify([env]) + "'"
+        const envs = [];
+        targetInputSets.forEach((set) => {
+            const env = {};
+            set.forEach((id) => {
+                const input = document.getElementById(id);
+                env[id] = input.value;
+            });
+            const isFilledEnv = Object.values(env).every((value) => {
+                return value.length > 0;
+            });
+            if (isFilledEnv) {
+                envs.push(env);
+            }
+        })
+        generated_env.value = "BLUE_NOTION_ENVS='" + JSON.stringify(envs) + "'"
     }
-    targetInputIds.forEach((id) => {
+    const allTargetIds = Array.from(new Set(targetInputSets.flat()));
+    allTargetIds.forEach((id) => {
         const input = document.getElementById(id);
         input.addEventListener('input', onChange);
     });

@@ -1,10 +1,10 @@
-import { BskyAgent } from "@atproto/api";
-import { AppBskyFeedGetAuthorFeed } from "@atproto/api";
+import { AppBskyFeedGetAuthorFeed, BskyAgent } from "@atproto/api";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ServiceItem } from "../common/Interface.js";
 import { NotionEnv } from "../notion/Notion.js";
-import { errorLog, log } from "../common/logger.js";
+import { createLogger } from "../common/logger.js";
 
+const logger = createLogger("Bluesky");
 export type BlueSkyEnv = {
     bluesky_identifier: string;
     bluesky_app_password: string;
@@ -26,6 +26,7 @@ export const convertPostToServiceIr = (post: PostView): ServiceItem => {
     const did = match[1];
     const contentId = match[2];
     return {
+        type: "Bluesky",
         // at://did:plc:niluiwex7fsnjak2wxs4j47y/app.bsky.feed.post/3jz3xglxhzu27@@azu.bsky.social
         title: record.text,
         url: `https://bsky.app/profile/${did}/post/${contentId}`,
@@ -48,7 +49,7 @@ export const collectTweetsUntil = async (timeline: ServiceItem[], lastTweet: Ser
             }
         }
     } catch (error) {
-        errorLog(new Error("collect error", {
+        logger.error(new Error("collect error", {
             cause: error,
         }));
     }
@@ -105,7 +106,7 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
         }
     };
 
-    log("fetching from bluesky since %s", lastServiceItem?.unixTimeMs !== undefined
+    logger.log("fetching from bluesky since %s", lastServiceItem?.unixTimeMs !== undefined
         ? new Date(lastServiceItem.unixTimeMs).toISOString()
         : "first");
     const feed = await fetchAuthorFeed({
@@ -118,8 +119,8 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
     const sortedPosts = convertedPosts.sort((a, b) => {
         return a.unixTimeMs > b.unixTimeMs ? -1 : 1;
     });
-    log("fetched item count", sortedPosts.length);
+    logger.log("fetched item count", sortedPosts.length);
     const postItems = lastServiceItem ? await collectTweetsUntil(sortedPosts, lastServiceItem) : sortedPosts;
-    log("post-able items count", postItems.length);
+    logger.log("post-able items count", postItems.length);
     return postItems;
 }
