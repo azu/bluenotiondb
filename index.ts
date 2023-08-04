@@ -14,8 +14,8 @@ const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
     throw new Error("unsupported env");
 }
 const envs = parserEnvs();
+const lastItem = await fetchLastPage(envs[0]);
 for (const env of envs) {
-    const lastItem = await fetchLastPage(env);
     log("last item exists: %s", lastItem ? "true" : "false");
     debug("lastItem object", lastItem);
     const postableItems = await fetchService(env, lastItem);
