@@ -3,7 +3,7 @@ import { NotionEnv } from "../notion/Notion.js";
 import { Octokit } from "@octokit/rest";
 import { createLogger } from "../common/logger.js";
 import { Endpoints } from "@octokit/types";
-import { parse } from "parse-github-event";
+import { compile, parse } from "parse-github-event";
 
 const logger = createLogger("GitHub");
 export type GitHubEnv = {
@@ -62,6 +62,7 @@ const getStateEmoji = (state: string): string => {
     }
     return "";
 }
+
 function compileFormPushEvent(event: any) {
     const commits = event.payload.commits;
     return commits.map(function (commit: any) {
@@ -79,8 +80,10 @@ function parseEventTitle(event: Event) {
             // @ts-expect-error
             return `${getStateEmoji(event.payload.pull_request.state)} ${event.payload.pull_request.title} on ${event.repo.name}#${event.payload.pull_request.number}`;
         } else {
-            const parsedEvent = parseGithubEvent.parse(event);
-            return parseGithubEvent.compile(parsedEvent);
+            // @ts-expect-error
+            const parsedEvent = parse(event);
+            // @ts-expect-error
+            return compile(parsedEvent);
         }
     }
 }
