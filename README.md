@@ -30,6 +30,12 @@ You can create `BLUE_NOTION_ENVS` on generator tool:
 
 - <https://azu.github.io/bluenotiondb/>
 
+### via CLI
+
+```bash
+$ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
+```
+
 ### via GitHub Actions
 
 1. Create GitHub repository
