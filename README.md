@@ -23,8 +23,8 @@ I want to create sync DB for Bluesky or Twitter etc...
 1. Create Notion Database
 2. Add Following Columns with type
     - `Title`: title column
-    - `URL`: URL type column
     - `Date`: Date type column
+    - `URL`: URL type column
     - `Type`: Select type column
         - Type will be service name
     - ![img.png](docs/img.png)
