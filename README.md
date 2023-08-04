@@ -138,7 +138,7 @@ DEBUG=1 ./bluenotiondb
 ```
 npm version {patch,minor,major}
 git push --follow-tags
-gh release create --generate-notes "$(git describe --tags --abbrev=0)" --discussion-category "announcements"
+# CI will create release
 ```
 
 ## License
