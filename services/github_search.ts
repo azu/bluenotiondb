@@ -2,7 +2,7 @@ import { ServiceItem } from "../common/Interface.js";
 import { NotionEnv } from "../notion/Notion.js";
 import { graphql } from "@octokit/graphql";
 import { SearchResultItemConnection } from "@octokit/graphql-schema";
-import { createLogger, errorLog } from "../common/logger.js";
+import { createLogger } from "../common/logger.js";
 
 const logger = createLogger("GitHubSearch");
 export type GitHubSearchEnv = {
@@ -142,7 +142,7 @@ export const collectUntil = (searchResults: SearchResultItem[], lastServiceItem:
             }
         }
     } catch (error) {
-        errorLog(new Error("collect error", {
+        logger.error(new Error("collect error", {
             cause: error,
         }));
     }

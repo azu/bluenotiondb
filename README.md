@@ -13,6 +13,9 @@ I want to create sync DB for Bluesky or Twitter etc...
 
 - [Bluesky](https://bsky.app/)
     - Pull Posts from Bluesky and push to Notion
+- [GitHub Activity](https://github.com/)
+    - Pull events of GitHub user and push to Notion 
+    - Open/Close/Comment of Issues/PRs etc...
 - [GitHub Search](https://github.com/search)
     - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
 
