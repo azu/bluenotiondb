@@ -31,6 +31,9 @@ jobs:
             ```yaml
             name: Update
             on:
+              push:
+                branches:
+                  - main
               schedule:
                 # every 30 minutes
                 - cron: "*/30 * * * *"

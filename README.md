@@ -46,10 +46,14 @@ $ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
 ```yaml
 name: Update
 on:
+  push:
+    branches:
+      - main
   schedule:
     # every 30 minutes
     - cron: "*/30 * * * *"
   workflow_dispatch:
+
 env:
   BLUE_NOTION_VERSION: v0.1.0 # see https://github.com/azu/bluenotiondb/releases/latest
 
