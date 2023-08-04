@@ -57,10 +57,21 @@
         <input type="text" id="github_token"
                name="github_token"
                placeholder="ghp-xxxx-xxxx-xxxx"><br>
+        <!-- select ISSUE or REPOSITORY -->
+        <label for="github_search_type">GitHub Search Type:</label><br>
+        <select id="github_search_type" name="github_search_type">
+            <option value="ISSUE">ISSUE</option>
+            <option value="REPOSITORY">REPOSITORY</option>
+        </select><br>
         <label for="github_search_query">GitHub Search query:</label><br>
         <input type="text" id="github_search_query"
                name="github_search_query"
-               placeholder="involves:@me"><br>
+               placeholder="GitHub Search query"
+               value="involves:@me sort:updated-desc"
+        ><br>
+        ✍️ <a
+            href="https://docs.github.com/en/issues/tracking-your-work-with-issues/filtering-and-searching-issues-and-pull-requests" target="_blank" rel="noopener">Search
+        Reference</a>
     </div>
     <div>
         <h2>Generated env(click and copy)</h2>
@@ -82,6 +93,7 @@
             'notion_api_key',
             'github_token',
             'github_search_query',
+            'github_search_type'
         ]
     ];
 

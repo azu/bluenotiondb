@@ -8,6 +8,7 @@ const logger = createLogger("GitHubSearch");
 export type GitHubSearchEnv = {
     github_token: string;
     github_search_query: string;
+    github_search_type: "ISSUE" | "REPOSITORY";
 } & NotionEnv;
 export const isGitHubSearchEnv = (env: any): env is GitHubSearchEnv => {
     return typeof env.github_token === "string" && typeof env.github_search_query === "string";
@@ -52,8 +53,9 @@ type SearchResultItem = SearchResultRepo | SearchResultIssueOrPullRequest;
 export const searchGithub = ({
                                  query,
                                  size,
+                                 type,
                                  GITHUB_TOKEN
-                             }: { query: string, size: number; GITHUB_TOKEN: string }): Promise<SearchResultItem[]> => {
+                             }: { query: string, size: number; type: GitHubSearchEnv["github_search_type"]; GITHUB_TOKEN: string }): Promise<SearchResultItem[]> => {
     return graphql<{ search: SearchResultItemConnection }>(
         `
             query($QUERY: String!, $TYPE: SearchType!, $SIZE: Int!) {
@@ -116,7 +118,7 @@ export const searchGithub = ({
         `,
         {
             QUERY: query,
-            TYPE: "ISSUE", // TODO: make this configurable
+            TYPE: type,
             SIZE: size,
             headers: {
                 authorization: `token ${GITHUB_TOKEN}`
@@ -194,6 +196,7 @@ export const fetchGitHubSearch = async (env: GitHubSearchEnv, lastServiceItem: S
     // fetch
     const searchResults = await searchGithub({
         query: env.github_search_query,
+        type: env.github_search_type,
         GITHUB_TOKEN: env.github_token,
         size: 20
     });

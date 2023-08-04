@@ -5,15 +5,16 @@ Sync any service to Notion.
 ## Purpose
 
 Notion does not support custom sync DB.
-I want to create sync DB for Bluesky or Twitter etc...
+I want to create sync DB for Bluesy or Twitter etc...
 
 `bluenotiondb` is customizable sync DB for Notion.
 
 ## Supported Services
 
 - [Bluesky](https://bsky.app/)
-
-:memo: `bluenotiondb` is suitable for immutable data like Bluesky. Mutable data like Note app is not suitable for `bluenotiondb`.
+    - Pull Posts from Bluesky and push to Notion
+- [GitHub Search](https://github.com/search)
+    - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
 
 ## Usage
 
