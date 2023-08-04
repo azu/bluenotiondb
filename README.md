@@ -39,8 +39,9 @@ $ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
 ### via GitHub Actions
 
 1. Create GitHub repository
-2. Put `.github/workflows/update.yml` to the repository
-3. Set `BLUE_NOTION_ENVS` to GitHub repository secret
+2. Put `.github/workflows/update.yml` to the repository 
+3. Copy from <https://github.com/azu/bluenotiondb/releases/latest> and Paste to `.github/workflows/update.yml`
+4. Set `BLUE_NOTION_ENVS` to GitHub repository secret
 
 ```yaml
 name: Update
@@ -130,6 +131,7 @@ DEBUG=1 ./bluenotiondb
 ```
 npm version {patch,minor,major}
 git push --follow-tags
+gh release create --generate-notes "$(git describe --tags --abbrev=0)" --discussion-category "announcements"
 ```
 
 ## License
