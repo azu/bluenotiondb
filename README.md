@@ -77,6 +77,18 @@ jobs:
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
 ```
 
+## Advanced Usage
+
+### Add custom field
+
+- `notion_extra` field is used for custom field
+    - `propertyNames` is column name
+    - `propertyValue` is notion payload 
+
+```
+[..., "notion_extra":[{ "propertyName":"Tags", "propertyValue": { "multi_select": [{ "name": "TEST" }] } }]]
+```
+
 ## Related
 
 - [azu/mytweets: Search all your tweets of Twitter/Bluesky](https://github.com/azu/mytweets)

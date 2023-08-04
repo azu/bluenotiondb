@@ -2,9 +2,24 @@ import { Client, LogLevel } from "@notionhq/client";
 import type { ServiceItem } from "../common/Interface.js";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints.js";
 
+type PropertyValueType = {
+    multi_select: {
+        name: string;
+    }[]
+};
+type NotionExtra = {
+    propertyName: string;
+    propertyValue: PropertyValueType;
+}[]
 export type NotionEnv = {
     notion_database_id: string;
     notion_api_key: string;
+
+    /**
+     * @example
+     * [{ "propertyName":"Tags", "propertyValue": { "multi_select": [{ "name": "foo" }] } }]
+     */
+    notion_extra: NotionExtra;
 }
 export const assertNotionEnv = (env: any): void => {
     if (env.notion_database_id === undefined) {
@@ -56,6 +71,7 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
         auth: env.notion_api_key,
         logLevel: LogLevel.WARN,
     });
+    const extra = env.notion_extra ?? [];
     return notion.pages.create({
         parent: { database_id: env.notion_database_id },
         properties: {
@@ -74,6 +90,7 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
                 date: { start: new Date(ir.unixTimeMs).toISOString() },
             },
             URL: { url: ir.url },
+            ...(Object.fromEntries(extra.map(e => [e.propertyName, e.propertyValue]))),
         },
     });
 };
