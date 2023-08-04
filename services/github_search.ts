@@ -69,7 +69,6 @@ export const searchGithub = ({
                                 nameWithOwner
                                 createdAt
                                 updatedAt
-                                description
                             }
                             ... on PullRequest {
                                 number
@@ -177,7 +176,7 @@ const convertSearchResultToServiceItem = (result: SearchResultItem): ServiceItem
                     {
                         type: "text",
                         text: {
-                            content: `${result.repository.nameWithOwner}#${result.number} ${result.title} ${getStateEmoji(result.state)} ${result.state}`,
+                            content: `${getStateEmoji(result.state)} ${result.repository.nameWithOwner}#${result.number} ${result.title} ${getStateEmoji(result.state)} ${result.state}`,
                             link: {
                                 url: result.url
                             }
