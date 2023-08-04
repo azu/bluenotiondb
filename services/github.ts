@@ -3,7 +3,7 @@ import { NotionEnv } from "../notion/Notion.js";
 import { Octokit } from "@octokit/rest";
 import { createLogger } from "../common/logger.js";
 import { Endpoints } from "@octokit/types";
-import { compile, parse } from "parse-github-event";
+import { parse } from "parse-github-event";
 
 const logger = createLogger("GitHub");
 export type GitHubEnv = {
@@ -62,24 +62,60 @@ const getStateEmoji = (state: string): string => {
     }
     return "";
 }
+// LICENSE : MIT
+"use strict";
+
+// https://developer.github.com/v3/repos/commits/
+const parseGithubEvent = require("parse-github-event");
+
+function compileFormPushEvent(event: any) {
+    const commits = event.payload.commits;
+    return commits.map(function (commit: any) {
+        return "- " + commit.message;
+    }).join("\n");
+}
+
+function parseEventTitle(event: Event) {
+    if (event.payload.issue) {
+        // {state} {issue.title} on {repo.name}#{issue.number}
+        return `${getStateEmoji(event.payload.issue.state)} ${event.payload.issue.title} on ${event.repo.name}#${event.payload.issue.number}`;
+    } else { // @ts-expect-error
+        if (event.payload.pull_request) {
+            // {state} {pull_request.title} on {repo.name}#{issue.number}
+            // @ts-expect-error
+            return `${getStateEmoji(event.payload.pull_request.state)} ${event.payload.pull_request.title} on ${event.repo.name}#${event.payload.pull_request.number}`;
+        } else {
+            const parsedEvent = parseGithubEvent.parse(event);
+            return parseGithubEvent.compile(parsedEvent);
+        }
+    }
+}
+
+function parseEventBody(event: Event) {
+    const payload = event.payload;
+    if (payload.comment) {
+        return payload.comment.body;
+    } else if (payload.issue) {
+        return payload.issue.body;
+    } else if (event.type === "PushEvent") {
+        return compileFormPushEvent(event);
+    } else { // @ts-expect-error
+        if (payload.pull_request) {
+            // @ts-expect-error
+            return payload.pull_request.body;
+        }
+    }
+    return "";
+}
+
 const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
+    const title = parseEventTitle(result);
+    const body = parseEventBody(result);
     // @ts-expect-error
     const parsed = parse(result);
-    if (!parsed) {
-        logger.error(new Error("parsed is null" + JSON.stringify(result)));
-        throw new Error("parsed is null");
-    }
-    const title = compile(parsed);
-    console.log("result", result);
-    console.log("parsed", parsed);
-    console.log("title", title);
-    const titleWithoutActor = title.replace(parsed.login + " ", "");
-    const titleWithEmoji = "action" in parsed.data
-        ? getStateEmoji(parsed.data.action) + titleWithoutActor
-        : titleWithoutActor;
     return {
         type: "GitHub",
-        title: titleWithEmoji,
+        title: body ? `${title}\n\n${body}` : title,
         url: parsed?.html_url ?? "",
         unixTimeMs: result.created_at ? new Date(result.created_at).getTime() : 0,
     }

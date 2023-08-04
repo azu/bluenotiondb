@@ -9,12 +9,11 @@ import { fetchGitHubEvents, isGithubEnv } from "./services/github.js";
 const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
     if (isGithubEnv(env)) {
         return fetchGitHubEvents(env, lastItem)
+    } else if (isBlueSkyEnv(env)) {
+        return fetchBluesky(env, lastItem);
+    } else if (isGitHubSearchEnv(env)) {
+        return fetchGitHubSearch(env, lastItem);
     }
-    // if (isBlueSkyEnv(env)) {
-    //     return fetchBluesky(env, lastItem);
-    // } else if (isGitHubSearchEnv(env)) {
-    //     return fetchGitHubSearch(env, lastItem);
-    // }
     throw new Error("unsupported env");
 }
 const envs = parserEnvs();

@@ -52,10 +52,22 @@
                placeholder="xxx-xxx-xxx"><br>
     </div>
     <div>
-        <h2>GitHub Config</h2>
-        <label for="github_token">GitHub Token:</label><br>
-        <input type="text" id="github_token"
-               name="github_token"
+        <h2>GitHub Activity Config</h2>
+        <label for="github_token___a">GitHub Token:</label><br>
+        <input type="text" id="github_token___a"
+               name="github_token___a"
+               placeholder="ghp-xxxx-xxxx-xxxx"><br>
+        <!--  github_user_name -->
+        <label for="github_user_name">GitHub User Name:</label><br>
+        <input type="text" id="github_user_name"
+               name="github_user_name"
+               placeholder="GitHub User Name"><br>
+    </div>
+    <div>
+        <h2>GitHub Search Config</h2>
+        <label for="github_token___b">GitHub Token:</label><br>
+        <input type="text" id="github_token___b"
+               name="github_token___b"
                placeholder="ghp-xxxx-xxxx-xxxx"><br>
         <!-- select ISSUE or REPOSITORY -->
         <label for="github_search_type">GitHub Search Type:</label><br>
@@ -70,7 +82,8 @@
                value="involves:@me sort:updated-desc"
         ><br>
         ✍️ <a
-            href="https://docs.github.com/en/issues/tracking-your-work-with-issues/filtering-and-searching-issues-and-pull-requests" target="_blank" rel="noopener">Search
+            href="https://docs.github.com/en/issues/tracking-your-work-with-issues/filtering-and-searching-issues-and-pull-requests"
+            target="_blank" rel="noopener">Search
         Reference</a>
     </div>
     <div>
@@ -87,11 +100,18 @@
             'bluesky_identifier',
             'bluesky_app_password',
         ],
-        // GitHub
+        // GitHub Activity
         [
             'notion_database_id',
             'notion_api_key',
-            'github_token',
+            'github_token___a',
+            'github_user_name',
+        ],
+        // GitHub Search
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'github_token___b',
             'github_search_query',
             'github_search_type'
         ]
@@ -110,7 +130,8 @@
             const env = {};
             set.forEach((id) => {
                 const input = document.getElementById(id);
-                env[id] = input.value;
+                // ___? will be removed from key
+                env[id.replace(/___\w+/, "")] = input.value;
             });
             const isFilledEnv = Object.values(env).every((value) => {
                 return value.length > 0;
