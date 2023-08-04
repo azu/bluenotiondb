@@ -15,9 +15,9 @@ const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
 }
 const envs = parserEnvs();
 const lastItem = await fetchLastPage(envs[0]);
+log("last item exists: %s", lastItem ? "true" : "false");
+debug("lastItem object", lastItem);
 for (const env of envs) {
-    log("last item exists: %s", lastItem ? "true" : "false");
-    debug("lastItem object", lastItem);
     const postableItems = await fetchService(env, lastItem);
     // sync to notion
     await syncToNotion(env, postableItems);
