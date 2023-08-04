@@ -7,10 +7,10 @@ import { fetchGitHubSearch, isGitHubSearchEnv } from "./services/github_search.j
 import { fetchGitHubEvents, isGithubEnv } from "./services/github.js";
 
 const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
-    if (isGithubEnv(env)) {
-        return fetchGitHubEvents(env, lastItem)
-    } else if (isBlueSkyEnv(env)) {
+    if (isBlueSkyEnv(env)) {
         return fetchBluesky(env, lastItem);
+    } else if (isGithubEnv(env)) {
+        return fetchGitHubEvents(env, lastItem)
     } else if (isGitHubSearchEnv(env)) {
         return fetchGitHubSearch(env, lastItem);
     }
