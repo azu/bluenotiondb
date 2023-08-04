@@ -62,12 +62,6 @@ const getStateEmoji = (state: string): string => {
     }
     return "";
 }
-// LICENSE : MIT
-"use strict";
-
-// https://developer.github.com/v3/repos/commits/
-const parseGithubEvent = require("parse-github-event");
-
 function compileFormPushEvent(event: any) {
     const commits = event.payload.commits;
     return commits.map(function (commit: any) {
