@@ -1,11 +1,11 @@
 {
   "name": "bluenotiondb",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
   "version": "0.4.0",
   "scripts": {
-    "main": "DEBUG=1 bun run ./index.ts",
-    "dist": "bun build ./index.ts --compile --outfile bluenotiondb",
+    "main": "DEBUG=1 bun run src/index.ts",
+    "dist": "bun build src/index.ts --compile --outfile bluenotiondb",
     "test": "eslint \"**/*.ts\""
   },
   "devDependencies": {
