@@ -97,11 +97,14 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
 };
 
 export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
+    const isDryRun = process.env.DRY_RUN === "true";
     let count = 0;
     for (const ir of irs) {
         try {
             info(`syncing ${count++}/${irs.length}`);
-            await createPage(env, ir);
+            if (!isDryRun) {
+                await createPage(env, ir);
+            }
         } catch (e) {
             errorLog(e);
             throw new Error(`failed to sync at ${count}/${irs.length}`);

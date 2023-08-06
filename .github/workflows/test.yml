@@ -23,4 +23,5 @@ jobs:
       - name: Update
         run: bun run index.ts
         env:
+          BLUE_NOTION_DRY_RUN: true
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_TEST }}
