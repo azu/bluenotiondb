@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download
-        if: ${{ steps.cache-bluenotiondb.outputs.cache-hit != 'true' }}
         run: |
           curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
