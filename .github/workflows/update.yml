@@ -1,0 +1,26 @@
+name: Update
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+env:
+  BLUE_NOTION_VERSION: v0.4.0
+
+permissions:
+  contents: none
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download
+        if: ${{ steps.cache-bluenotiondb.outputs.cache-hit != 'true' }}
+        run: |
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          chmod +x bluenotiondb
+      - name: Update
+        run: ./bluenotiondb > /dev/null 2>&1
+        env:
+          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_UPDATE }}
