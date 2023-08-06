@@ -6,6 +6,9 @@ import { debug, info } from "./common/logger.js";
 import { fetchGitHubSearch, isGitHubSearchEnv } from "./services/github_search.js";
 import { fetchGitHubEvents, isGithubEnv } from "./services/github.js";
 
+if (Boolean(process.env.DRY_RUN)) {
+    info("DRY_RUN mode");
+}
 const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
     if (isBlueSkyEnv(env)) {
         return fetchBluesky(env, lastItem);
