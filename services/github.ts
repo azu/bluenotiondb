@@ -47,6 +47,7 @@ export const collectUntil = (events: Events, lastServiceItem: ServiceItem): Even
         logger.error(new Error("collect error", {
             cause: error,
         }));
+        throw new Error("collect error at GitHub");
     }
     return filteredResults;
 };
@@ -123,12 +124,12 @@ export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: Service
         github_username: env.github_username,
         GITHUB_TOKEN: env.github_token,
     });
-    logger.log("GitHub Events count", events.length);
+    logger.info("GitHub Events count", events.length);
     // filter
     const filteredResults = lastServiceItem
         ? collectUntil(events, lastServiceItem)
         : events;
-    logger.log("filtered GitHub Events count", filteredResults.length)
+    logger.info("filtered GitHub Events count", filteredResults.length)
     // convert
     return filteredResults.map(convertSearchResultToServiceItem);
 }

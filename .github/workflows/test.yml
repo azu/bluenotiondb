@@ -18,6 +18,8 @@ jobs:
           bun-version: "0.7.1"
       - name: Install
         run: bun install
+      - name: Test
+        run: bun run test
       - name: Update
         run: bun run index.ts
         env:

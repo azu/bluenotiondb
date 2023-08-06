@@ -145,6 +145,7 @@ export const collectUntil = (searchResults: SearchResultItem[], lastServiceItem:
         logger.error(new Error("collect error", {
             cause: error,
         }));
+        throw new Error("collect error at bluesky");
     }
     return filteredResults;
 };
@@ -188,7 +189,7 @@ const convertSearchResultToServiceItem = (result: SearchResultItem): ServiceItem
                 unixTimeMs: new Date(result.updatedAt).getTime(),
             }
     }
-    throw new Error("unknown type: " + JSON.stringify(result));
+    throw new Error("unknown type: " + (result as { __typename: never }).__typename)
 }
 const IGNORE_AUTHOR = ["dependabot-preview[bot]", "renovate", "dependabot[bot]"];
 export const fetchGitHubSearch = async (env: GitHubSearchEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
@@ -199,7 +200,7 @@ export const fetchGitHubSearch = async (env: GitHubSearchEnv, lastServiceItem: S
         GITHUB_TOKEN: env.github_token,
         size: 20
     });
-    logger.log("searchResults count", searchResults.length);
+    logger.info("searchResults count", searchResults.length);
     const searchResultsWithoutIgnoredAuthor = searchResults.filter((result) => {
         if (result.__typename === "Issue" || result.__typename === "PullRequest") {
             return !IGNORE_AUTHOR.includes(result.author.login);
@@ -210,7 +211,7 @@ export const fetchGitHubSearch = async (env: GitHubSearchEnv, lastServiceItem: S
     const filteredResults = lastServiceItem
         ? collectUntil(searchResultsWithoutIgnoredAuthor, lastServiceItem)
         : searchResultsWithoutIgnoredAuthor;
-    logger.log("filtered results count", filteredResults.length)
+    logger.info("filtered results count", filteredResults.length)
     // convert
     return filteredResults.map(convertSearchResultToServiceItem);
 }

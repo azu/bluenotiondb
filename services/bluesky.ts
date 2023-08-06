@@ -52,6 +52,7 @@ export const collectTweetsUntil = async (timeline: ServiceItem[], lastTweet: Ser
         logger.error(new Error("collect error", {
             cause: error,
         }));
+        throw new Error("collect error at bluesky");
     }
     return results;
 };
@@ -106,7 +107,7 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
         }
     };
 
-    logger.log("fetching from bluesky since %s", lastServiceItem?.unixTimeMs !== undefined
+    logger.info("fetching from bluesky since %s", lastServiceItem?.unixTimeMs !== undefined
         ? new Date(lastServiceItem.unixTimeMs).toISOString()
         : "first");
     const feed = await fetchAuthorFeed({
@@ -119,8 +120,8 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
     const sortedPosts = convertedPosts.sort((a, b) => {
         return a.unixTimeMs > b.unixTimeMs ? -1 : 1;
     });
-    logger.log("fetched item count", sortedPosts.length);
+    logger.info("fetched item count", sortedPosts.length);
     const postItems = lastServiceItem ? await collectTweetsUntil(sortedPosts, lastServiceItem) : sortedPosts;
-    logger.log("post-able items count", postItems.length);
+    logger.info("post-able items count", postItems.length);
     return postItems;
 }

@@ -1,6 +1,7 @@
 import { Client, LogLevel } from "@notionhq/client";
 import type { ServiceItem } from "../common/Interface.js";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints.js";
+import { errorLog, info } from "../common/logger.js";
 
 type PropertyValueType = {
     multi_select: {
@@ -99,10 +100,11 @@ export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
     let count = 0;
     for (const ir of irs) {
         try {
-            console.info(`syncing ${count++}/${irs.length}`);
+            info(`syncing ${count++}/${irs.length}`);
             await createPage(env, ir);
         } catch (e) {
-            console.error(e);
+            errorLog(e);
+            throw new Error(`failed to sync at ${count}/${irs.length}`);
         }
     }
 }
