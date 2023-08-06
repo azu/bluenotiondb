@@ -62,7 +62,7 @@ on:
   workflow_dispatch:
 
 env:
-  BLUE_NOTION_VERSION: v0.1.0 # see https://github.com/azu/bluenotiondb/releases/latest
+  BLUE_NOTION_VERSION: v0.4.1
 
 permissions:
   contents: none
@@ -152,8 +152,8 @@ DEBUG=1 ./bluenotiondb
 
 ```
 npm version {patch,minor,major}
+npm run sync-version
 git push --follow-tags
-# CI will create release
 ```
 
 ## License
