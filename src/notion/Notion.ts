@@ -73,6 +73,7 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
         logLevel: LogLevel.WARN,
     });
     const extra = env.notion_extra ?? [];
+    const NOTION_MAX_TITLE_LENGTH = 2000;
     return notion.pages.create({
         parent: { database_id: env.notion_database_id },
         properties: {
@@ -80,9 +81,9 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
                 title: typeof ir.title === "string"
                     ? [{
                         type: "text",
-                        text: { content: ir.title }
+                        text: { content: ir.title.slice(0, NOTION_MAX_TITLE_LENGTH) }
                     }]
-                    : ir.title,
+                    : ir.title.slice(0, NOTION_MAX_TITLE_LENGTH),
             },
             Type: {
                 select: { name: ir.type },
