@@ -8,6 +8,7 @@
     "dry-run": "BLUE_NOTION_DRY_RUN=true bun run src/index.ts",
     "dist": "bun build src/index.ts --compile --outfile bluenotiondb",
     "test": "eslint \"**/*.ts\"",
+    "post-version": "npm run sync-version",
     "sync-version": "bash ./scripts/sync-version.sh"
   },
   "devDependencies": {
