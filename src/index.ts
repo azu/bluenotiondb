@@ -5,17 +5,26 @@ import { ServiceItem } from "./common/Interface.js";
 import { debug, info } from "./common/logger.js";
 import { fetchGitHubSearch, isGitHubSearchEnv } from "./services/github_search.js";
 import { fetchGitHubEvents, isGithubEnv } from "./services/github.js";
+import { RetryAbleError } from "./common/RetryAbleError.js";
 
 if (Boolean(process.env.DRY_RUN)) {
     info("DRY_RUN mode");
 }
-const fetchService = (env: SupportedEnv, lastItem: ServiceItem | null) => {
-    if (isBlueSkyEnv(env)) {
-        return fetchBluesky(env, lastItem);
-    } else if (isGithubEnv(env)) {
-        return fetchGitHubEvents(env, lastItem)
-    } else if (isGitHubSearchEnv(env)) {
-        return fetchGitHubSearch(env, lastItem);
+const fetchService = async (env: SupportedEnv, lastItem: ServiceItem | null): Promise<Promise<ServiceItem[]>> => {
+    try {
+        if (isBlueSkyEnv(env)) {
+            return await fetchBluesky(env, lastItem);
+        } else if (isGithubEnv(env)) {
+            return await fetchGitHubEvents(env, lastItem)
+        } else if (isGitHubSearchEnv(env)) {
+            return await fetchGitHubSearch(env, lastItem);
+        }
+    } catch (error) {
+        if (error instanceof RetryAbleError) {
+            info("retryable error", error.message);
+            return fetchService(env, lastItem);
+        }
+        throw error;
     }
     throw new Error("unsupported env");
 }
