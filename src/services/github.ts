@@ -4,6 +4,7 @@ import { Octokit } from "@octokit/rest";
 import { createLogger } from "../common/logger.js";
 import { Endpoints } from "@octokit/types";
 import { compile, parse } from "parse-github-event";
+import { RetryAbleError } from "../common/RetryAbleError.js";
 
 const logger = createLogger("GitHub");
 export type GitHubEnv = {
@@ -28,6 +29,10 @@ export const searchGithub = async ({
             'X-GitHub-Api-Version': '2022-11-28'
         }
     });
+    // 50x error will be retry-able error
+    if (rest.status >= 500 && rest.status < 600) {
+        throw new RetryAbleError("Retry-able Error on GitHub: " + rest.status);
+    }
     return rest.data
 };
 

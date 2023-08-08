@@ -1,8 +1,9 @@
 import { ServiceItem } from "../common/Interface.js";
 import { NotionEnv } from "../notion/Notion.js";
-import { graphql } from "@octokit/graphql";
+import { graphql, GraphqlResponseError } from "@octokit/graphql";
 import { SearchResultItemConnection } from "@octokit/graphql-schema";
 import { createLogger } from "../common/logger.js";
+import { RetryAbleError } from "../common/RetryAbleError.js";
 
 const logger = createLogger("GitHubSearch");
 export type GitHubSearchEnv = {
@@ -127,7 +128,18 @@ export const searchGithub = ({
         return (result.search.edges?.flatMap((edge) => {
             return edge?.node ? [edge.node] : [];
         }) ?? []) as SearchResultItem[];
-    })
+    }).catch((error) => {
+        if (error instanceof GraphqlResponseError) {
+            // 50x error will be retry
+            const statusCode = Number(error.headers.status ?? 0);
+            if (statusCode >= 500 && statusCode < 600) {
+                throw new RetryAbleError("Retryable error on GitHub Search", {
+                    cause: error,
+                });
+            }
+        }
+        throw error;
+    });
 };
 
 export const collectUntil = (searchResults: SearchResultItem[], lastServiceItem: ServiceItem): SearchResultItem[] => {
