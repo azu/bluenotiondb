@@ -76,12 +76,12 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
     };
     // collect feed 50 * 20
     const fetchAuthorFeed = async ({ actor, feed, cursor }: FetchAuthorFeedParams): Promise<Feed> => {
-        if (feed.length >= 1000) {
+        if (feed.length >= 100) {
             return feed;
         }
         const timeline = await agent.getAuthorFeed({
             actor,
-            limit: 50,
+            limit: 20,
             cursor
         });
         if (timeline.success) {
