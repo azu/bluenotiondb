@@ -1,7 +1,7 @@
 name: Update
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 env:
   BLUE_NOTION_VERSION: v0.5.1
