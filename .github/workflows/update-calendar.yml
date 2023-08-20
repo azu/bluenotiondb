@@ -1,0 +1,31 @@
+name: Update Calendar
+on:
+  schedule:
+    # every hour
+    - cron: "0 * * * *"
+  workflow_dispatch:
+env:
+  BLUE_NOTION_VERSION: v0.5.2
+
+permissions:
+  contents: none
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-bluenotion-calendar
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-bluenotion-calendar
+      - name: Download
+        run: |
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          chmod +x bluenotiondb
+      - name: Update
+        run: ./bluenotiondb > /dev/null 2>&1
+        env:
+          CACHE_DIR: ./cache
+          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_UPDATE_CALENDAR }}
