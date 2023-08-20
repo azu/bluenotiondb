@@ -7,6 +7,7 @@ import { fetchGitHubSearch, isGitHubSearchEnv } from "./services/github_search.j
 import { fetchGitHubEvents, isGithubEnv } from "./services/github.js";
 import { RetryAbleError } from "./common/RetryAbleError.js";
 import { RateLimitError } from "./common/RateLimitError.js";
+import { fetchCalendar, isCalendarEnv } from "./services/calendar.js";
 
 if (Boolean(process.env.DRY_RUN)) {
     info("DRY_RUN mode");
@@ -19,6 +20,8 @@ const fetchService = async (env: SupportedEnv, lastItem: ServiceItem | null): Pr
             return await fetchGitHubEvents(env, lastItem)
         } else if (isGitHubSearchEnv(env)) {
             return await fetchGitHubSearch(env, lastItem);
+        } else if (isCalendarEnv(env)) {
+            return await fetchCalendar(env, lastItem);
         }
     } catch (error) {
         if (error instanceof RetryAbleError) {

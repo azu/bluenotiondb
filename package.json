@@ -4,8 +4,8 @@
   "type": "module",
   "version": "0.5.2",
   "scripts": {
-    "main": "DEBUG=1 bun run src/index.ts",
-    "dry-run": "BLUE_NOTION_DRY_RUN=true bun run src/index.ts",
+    "main": "CACHE_DIR=$(pwd)/.cache DEBUG=1 bun run src/index.ts",
+    "dry-run": "CACHE_DIR=$(pwd)/.cache BLUE_NOTION_DRY_RUN=true bun run src/index.ts",
     "dist": "bun build src/index.ts --compile --outfile bluenotiondb",
     "test": "eslint \"**/*.ts\"",
     "postversion": "npm run sync-version",
@@ -27,6 +27,8 @@
     "@octokit/graphql": "^7.0.1",
     "@octokit/graphql-schema": "^14.25.0",
     "@octokit/rest": "^20.0.1",
+    "ical-js-parser": "^0.7.4",
+    "node-ical": "^0.16.1",
     "parse-github-event": "^1.1.3"
   }
 }
