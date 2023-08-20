@@ -5,6 +5,7 @@ import { createLogger } from "../common/logger.js";
 import { Endpoints } from "@octokit/types";
 import { compile, parse } from "parse-github-event";
 import { RetryAbleError } from "../common/RetryAbleError.js";
+import { RateLimitError } from "../common/RateLimitError.js";
 
 const logger = createLogger("GitHub");
 export type GitHubEnv = {
@@ -16,24 +17,35 @@ export const isGithubEnv = (env: any): env is GitHubEnv => {
 }
 type Events = Endpoints["GET /users/{username}/events"]["response"]["data"];
 type Event = Endpoints["GET /users/{username}/events"]["response"]["data"][number];
-export const searchGithub = async ({
-                                       github_username,
-                                       GITHUB_TOKEN
-                                   }: { github_username: string; GITHUB_TOKEN: string }): Promise<Events> => {
+export const fetchUserEvents = async ({
+                                          github_username,
+                                          GITHUB_TOKEN
+                                      }: { github_username: string; GITHUB_TOKEN: string }): Promise<Events> => {
     const octokit = new Octokit({
         auth: GITHUB_TOKEN,
     });
-    const rest = await octokit.request('GET /users/{username}/events', {
-        username: github_username,
-        headers: {
-            'X-GitHub-Api-Version': '2022-11-28'
+    try {
+        const rest = await octokit.request('GET /users/{username}/events', {
+            username: github_username,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+
+        // 50x error will be retry-able error
+        if (rest.status >= 500 && rest.status < 600) {
+            throw new RetryAbleError("Retry-able Error on GitHub: " + rest.status);
         }
-    });
-    // 50x error will be retry-able error
-    if (rest.status >= 500 && rest.status < 600) {
-        throw new RetryAbleError("Retry-able Error on GitHub: " + rest.status);
+        return rest.data
+    } catch (error) {
+        // rate limit error
+        if ((error as { status: number }).status === 403) {
+            throw new RateLimitError("Rate Limit Error on GitHub", {
+                cause: error,
+            });
+        }
+        throw error;
     }
-    return rest.data
 };
 
 export const collectUntil = (events: Events, lastServiceItem: ServiceItem): Events => {
@@ -125,7 +137,7 @@ const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
 }
 export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
     // fetch
-    const events = await searchGithub({
+    const events = await fetchUserEvents({
         github_username: env.github_username,
         GITHUB_TOKEN: env.github_token,
     });

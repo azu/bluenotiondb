@@ -79,31 +79,35 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
         if (feed.length >= 100) {
             return feed;
         }
-        const timeline = await agent.getAuthorFeed({
-            actor,
-            limit: 20,
-            cursor
-        });
-        if (timeline.success) {
-            // if found older tweet than lasttweet , stop fetching
-            const latestPost = timeline.data.feed.at(-1);
-            if (lastServiceItem && latestPost) {
-                const lastItemDate = new Date(latestPost?.post?.indexedAt);
-                if (lastItemDate.getTime() < lastServiceItem.unixTimeMs) {
+        try {
+            const timeline = await agent.getAuthorFeed({
+                actor,
+                limit: 20,
+                cursor
+            });
+            if (timeline.success) {
+                // if found older tweet than lasttweet , stop fetching
+                const latestPost = timeline.data.feed.at(-1);
+                if (lastServiceItem && latestPost) {
+                    const lastItemDate = new Date(latestPost?.post?.indexedAt ?? "");
+                    if (lastItemDate.getTime() < lastServiceItem.unixTimeMs) {
+                        return [...feed, ...timeline.data.feed];
+                    }
+                }
+                if (timeline.data.cursor) {
+                    return fetchAuthorFeed({
+                        actor: actor,
+                        feed: [...feed, ...timeline.data.feed],
+                        cursor: timeline.data.cursor
+                    });
+                } else {
                     return [...feed, ...timeline.data.feed];
                 }
-            }
-            if (timeline.data.cursor) {
-                return fetchAuthorFeed({
-                    actor: actor,
-                    feed: [...feed, ...timeline.data.feed],
-                    cursor: timeline.data.cursor
-                });
             } else {
-                return [...feed, ...timeline.data.feed];
+                throw new Error("timeline fetch error:" + JSON.stringify(timeline.data));
             }
-        } else {
-            throw new Error("timeline fetch error:" + JSON.stringify(timeline.data));
+        } catch (error) {
+            throw error;
         }
     };
 

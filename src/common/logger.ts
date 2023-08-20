@@ -2,6 +2,9 @@
 export const info = (message?: any, ...optionalParams: any[]) => {
     console.info(message, ...optionalParams);
 }
+export const warn = (message?: any, ...optionalParams: any[]) => {
+    console.warn(message, ...optionalParams);
+}
 export const errorLog = (message?: any, ...optionalParams: any[]) => {
     console.error(message, ...optionalParams);
 }
