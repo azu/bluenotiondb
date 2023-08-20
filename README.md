@@ -27,7 +27,7 @@ I want to create sync DB for Bluesky or Twitter etc...
 2. Add Following Columns with type
     - `Title`: title column
     - `Date`: Date type column
-        - It should enable "Time"
+        - Also, It should enable "Time"
     - `URL`: URL type column
     - `Type`: Select type column
         - Type will be service name

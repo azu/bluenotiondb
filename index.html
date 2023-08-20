@@ -91,6 +91,14 @@
         Reference</a>
     </div>
     <div>
+        <h2>Calendar(iCal)</h2>
+        <p>If you want to sync calendar, fill the iCal Url.</p>
+        <label for="calendar_url">iCal URL:</label><br>
+        <input type="text" id="calendar_url"
+               name="calendar_url"
+               placeholder="https://example.test/you.ical"><br>
+    </div>
+    <div>
         <h2>Generated env(click and copy)</h2>
         <textarea id="generated_env" cols="30" rows="10" readonly></textarea>
     </div>
@@ -118,6 +126,12 @@
             'github_token___b',
             'github_search_query',
             'github_search_type'
+        ],
+        // Calendar
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'calendar_url',
         ]
     ];
 
