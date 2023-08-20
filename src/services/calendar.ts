@@ -36,7 +36,11 @@ const writeCache = async (cache: CacheItem[]) => {
     const cachePath = `${CACHE_DIR}/${cacheFileName}`;
     await fs.writeFile(cachePath, JSON.stringify(cache));
 }
-const updateCacheEvent = (cache: CacheItem[], serviceItems: { uid: string; unixTimeMs: number }[], today = new Date()) => {
+const updateCacheEvent = ({
+                              cache,
+                              serviceItems,
+                              today = new Date()
+                          }: { cache: CacheItem[], serviceItems: { uid: string; unixTimeMs: number }[], today?: Date }) => {
     // add serviceItems to cache
     const newCache = cache.concat(serviceItems.map(item => {
         return {
@@ -78,9 +82,12 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
             }
         });
     const cache = await readCache();
-    const newCache = updateCacheEvent(cache, events, today);
+    const newEvents = events.filter(event => {
+        return !cache.some(item => item.uid === event.uid);
+    });
+    const newCache = updateCacheEvent({ cache, serviceItems: newEvents, today });
     await writeCache(newCache);
-    return events.map(item => {
+    return newEvents.map(item => {
         return {
             type: "calendar",
             title: item.title,
