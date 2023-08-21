@@ -33,6 +33,7 @@ const readCache = async (): Promise<CacheItem[]> => {
     }
 }
 const writeCache = async (cache: CacheItem[]) => {
+    await fs.mkdir(CACHE_DIR, { recursive: true });
     const cachePath = `${CACHE_DIR}/${cacheFileName}`;
     await fs.writeFile(cachePath, JSON.stringify(cache));
 }
@@ -91,7 +92,7 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
         return {
             type: "calendar",
             title: item.title,
-            url: item.url,
+            url: item.url ?? "https://",
             unixTimeMs: item.unixTimeMs,
         }
     });

@@ -107,6 +107,7 @@ export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
                 await createPage(env, ir);
             }
         } catch (e) {
+            errorLog("Fail to sync: " + JSON.stringify(ir));
             errorLog(e);
             throw new Error(`failed to sync at ${count}/${irs.length}`);
         }

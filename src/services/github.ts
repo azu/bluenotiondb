@@ -131,7 +131,7 @@ const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
     return {
         type: "GitHub",
         title: body ? `${title}\n\n${body}` : title,
-        url: parsed?.html_url ?? "",
+        url: parsed?.html_url ?? "https://",
         unixTimeMs: result.created_at ? new Date(result.created_at).getTime() : 0,
     }
 }
