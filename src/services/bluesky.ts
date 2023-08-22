@@ -85,6 +85,7 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
                 limit: 20,
                 cursor
             });
+
             if (timeline.success) {
                 // if found older tweet than lasttweet , stop fetching
                 const latestPost = timeline.data.feed.at(-1);
@@ -107,6 +108,12 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
                 throw new Error("timeline fetch error:" + JSON.stringify(timeline.data));
             }
         } catch (error) {
+            logger.debug("fetch error", {
+                // @ts-ignore
+                status: error.status,
+                // @ts-ignore
+                code: error.code,
+            });
             throw error;
         }
     };
