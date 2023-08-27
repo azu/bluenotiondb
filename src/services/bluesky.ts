@@ -76,13 +76,10 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
     };
     // collect feed 50 * 20
     const fetchAuthorFeed = async ({ actor, feed, cursor }: FetchAuthorFeedParams): Promise<Feed> => {
-        if (feed.length >= 100) {
-            return feed;
-        }
         try {
             const timeline = await agent.getAuthorFeed({
                 actor,
-                limit: 20,
+                limit: 50,
                 cursor
             });
 
@@ -95,15 +92,7 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
                         return [...feed, ...timeline.data.feed];
                     }
                 }
-                if (timeline.data.cursor) {
-                    return fetchAuthorFeed({
-                        actor: actor,
-                        feed: [...feed, ...timeline.data.feed],
-                        cursor: timeline.data.cursor
-                    });
-                } else {
-                    return [...feed, ...timeline.data.feed];
-                }
+                return [...feed, ...timeline.data.feed];
             } else {
                 throw new Error("timeline fetch error:" + JSON.stringify(timeline.data));
             }
