@@ -18,6 +18,8 @@ I want to create sync DB for Bluesky or Twitter etc...
     - Open/Close/Comment of Issues/PRs etc...
 - [GitHub Search](https://github.com/search)
     - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
+- iCal calendar like [Google Calendar](https://calendar.google.com/)
+    - Pull events from iCal and push to Notion
 
 ## Usage
 
@@ -115,6 +117,51 @@ Limitation: Currently does not put non-Ascii characters to `.env`.
 You can use unicode escape sequence like `\u30bf\u30b9\u30af\u540d` instead of non-Ascii characters.
 
 - [Unicodeエスケープシーケンス変換｜コードをホームページに載せる時に便利 | すぐに使える便利なWEBツール | Tech-Unlimited](https://tech-unlimited.com/escape-unicode.html).
+
+## Recipe
+
+### Sync Google Calendar to Notion
+
+1. Copy your iCal URL from Google Calendar
+2. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+    - <https://azu.github.io/bluenotiondb/>
+3. Create Update Calendar workflow
+
+```yaml
+name: Update Calendar
+on:
+  schedule:
+    # every 12 hours
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+env:
+  BLUE_NOTION_VERSION: v0.7.1
+
+permissions:
+  contents: none
+jobs:
+  calendar:
+    runs-on: ubuntu-latest
+    steps:
+      # require to cache for preventing duplicate events
+      - name: Cache
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-bluenotion-calendar
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-bluenotion-calendar
+      - name: Download
+        run: |
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          chmod +x bluenotiondb
+      - name: Update
+        run: ./bluenotiondb > /dev/null 2>&1
+        env:
+          CACHE_DIR: ./cache
+          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_HOME }}
+```
+
 
 ## Related
 
