@@ -24,7 +24,7 @@ I want to create sync DB for Bluesky or Twitter etc...
 ## Setup Notion
 
 1. Create Notion Database
-2. Add Following Columns with type
+2. Add following Properties with type
     - `Title`: title column
     - `Date`: Date type column
         - Also, It should enable "Time"
@@ -32,6 +32,7 @@ I want to create sync DB for Bluesky or Twitter etc...
     - `Type`: Select type column
         - Type will be service name
     - ![img.png](docs/img.png)
+    - Note: You can change the property name by `notion_property_names` option
 3. Create Notion Integration
     - <https://www.notion.so/my-integrations>
 4. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
@@ -84,12 +85,29 @@ jobs:
 
 ### Add custom field
 
-- `notion_extra` field is used for custom field
-    - `propertyNames` is column name
-    - `propertyValue` is notion payload 
+- `notion_property_names` option is used for custom property name
+
+You can change the property name by `notion_property_names` option.
+
+- `Title`: title column
+- `URL`: URL type column
+- `Type`: Select type column
+- `Date`: Date type column
+
+For example, if you want to change `Title` to `Tasks` and `URL` to `url`, you can use `notion_property_names` option.
 
 ```
-[..., "notion_extra":[{ "propertyName":"Tags", "propertyValue": { "multi_select": [{ "name": "TEST" }] } }]]
+[..., "notion_property_names":{ "Title": "Tasks", "URL": "url" }]
+```
+
+- `notion_extra` field is an object like `{ propertyNames: propertyValue }`
+    - `propertyNames` is property name
+    - `propertyValue` is [notion payload](https://developers.notion.com/reference/property-object)
+
+For example, if you want to add `Tags` column to Notion, you can use `notion_extra` option.
+
+```
+[..., "notion_extra":{ "Tags": { "multi_select": [{ "name": "TEST" }] }} ]
 ```
 
 ## Related
