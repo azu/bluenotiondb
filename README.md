@@ -63,7 +63,7 @@ on:
   workflow_dispatch:
 
 env:
-  BLUE_NOTION_VERSION: v0.7.0
+  BLUE_NOTION_VERSION: v0.7.1
 
 permissions:
   contents: none
