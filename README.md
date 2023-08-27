@@ -112,7 +112,7 @@ For example, if you want to add `Tags` column to Notion, you can use `notion_ext
 
 
 Limitation: Currently does not put non-Ascii characters to `.env`.
-You can use unicode escape sequence like `\\u{1F4A1}` instead of non-Ascii characters.
+You can use unicode escape sequence like `\u30bf\u30b9\u30af\u540d` instead of non-Ascii characters.
 
 - [Unicodeエスケープシーケンス変換｜コードをホームページに載せる時に便利 | すぐに使える便利なWEBツール | Tech-Unlimited](https://tech-unlimited.com/escape-unicode.html).
 
