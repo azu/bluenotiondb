@@ -91,7 +91,9 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
             Date: {
                 date: { start: new Date(ir.unixTimeMs).toISOString() },
             },
-            URL: { url: ir.url },
+            ...(ir.url === undefined ? {} : {
+                URL: { url: ir.url },
+            }),
             ...(Object.fromEntries(extra.map(e => [e.propertyName, e.propertyValue]))),
         },
     });

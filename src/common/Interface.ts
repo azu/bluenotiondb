@@ -8,5 +8,5 @@ export type ServiceItem = {
     type: string;
     title: string | TitleProperty["title"];
     unixTimeMs: number;
-    url: string;
+    url?: string;
 }
