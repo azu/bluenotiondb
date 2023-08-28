@@ -1,9 +1,8 @@
 import ical from "node-ical"
 import { NotionEnv } from "../notion/Notion.js";
 import { ServiceItem } from "../common/Interface.js";
-import * as fs from "fs/promises";
+import { createCache } from "../common/cache.js";
 
-const CACHE_DIR = process.env.CACHE_DIR || "./cache"
 export type CalendarEnv = {
     calendar_url: string;
 } & NotionEnv;
@@ -19,33 +18,18 @@ const isBetween = (targetDate: Date, start: Date, days: number) => {
     const endDate = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
     return start <= targetDate && targetDate <= endDate;
 }
-const cacheFileName = "calendar.json";
+const cacheFileName = "calendar.json" as const;
 type CacheItem = {
     id: string;
     unixTimeMs: number;
 }
-
-const readCache = async (): Promise<CacheItem[]> => {
-    const cachePath = `${CACHE_DIR}/${cacheFileName}`;
-    try {
-        const cache = await fs.readFile(cachePath, "utf-8");
-        return JSON.parse(cache) as CacheItem[];
-    } catch (e) {
-        return [];
-    }
-}
-const writeCache = async (cache: CacheItem[]) => {
-    await fs.mkdir(CACHE_DIR, { recursive: true });
-    const cachePath = `${CACHE_DIR}/${cacheFileName}`;
-    await fs.writeFile(cachePath, JSON.stringify(cache));
-}
 const updateCacheEvents = ({
-                               cache,
+                               oldEvents,
                                newEvents,
                                today = new Date()
-                           }: { cache: CacheItem[], newEvents: { uid: string; unixTimeMs: number }[], today?: Date }) => {
+                           }: { oldEvents: CacheItem[], newEvents: { uid: string; unixTimeMs: number }[], today?: Date }) => {
     // add serviceItems to cache
-    const newCache = cache.concat(newEvents.map(item => {
+    const newCache = oldEvents.concat(newEvents.map(item => {
         return {
             unixTimeMs: item.unixTimeMs,
             id: item.uid,
@@ -85,12 +69,17 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
                 unixTimeMs: event.start.getTime(),
             }
         });
-    const cache = await readCache();
+    const cache = createCache<CacheItem>(cacheFileName);
+    const cachedEvents = await cache.read();
     const newEvents = events.filter(event => {
-        return !cache.some(item => item.id === event.uid);
+        return !cachedEvents.some(item => item.id === event.uid);
     });
-    const newCache = updateCacheEvents({ cache, newEvents: newEvents, today: startOfToday });
-    await writeCache(newCache);
+    const newCache = updateCacheEvents({
+        oldEvents: cachedEvents,
+        newEvents: newEvents,
+        today: startOfToday
+    });
+    await cache.write(newCache);
     return newEvents.map(item => {
         return {
             type: "calendar",
