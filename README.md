@@ -20,8 +20,10 @@ I want to create sync DB for Bluesky or Twitter etc...
     - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
 - iCal calendar like [Google Calendar](https://calendar.google.com/)
     - Pull events from iCal and push to Notion
+    - **Required**: need to setup `actions/cache` action
 - RSS Feeds
     - Pull posts from RSS Feeds and push to Notion
+    - **Required**: need to setup `actions/cache` action
 
 ## Usage
 
@@ -161,7 +163,7 @@ jobs:
         run: ./bluenotiondb > /dev/null 2>&1
         env:
           CACHE_DIR: ./cache
-          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_HOME }}
+          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
 ```
 
 
