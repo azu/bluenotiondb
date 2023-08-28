@@ -49,15 +49,18 @@ export const fetchRss = async (env: RssEnv, lastServiceItem: ServiceItem | null)
     const cache = createCache<CacheItem>("rss.json");
     const oldItems = await cache.read();
     const newItems = feed.items.filter(item => {
+        if (!isFeedItem(item)) {
+            return false;
+        }
         const id = item.link;
-        return !oldItems.some(oldItem => oldItem.id === id);
-    }).filter(isFeedItem);
-    const newEvents = newItems.filter(item => item.id).map(item => {
+        return !oldItems.find(oldItem => oldItem.id === id);
+    })
+    const newEvents = newItems.map(item => {
         return {
             id: item.link,
             unixTimeMs: item.pubDate ? new Date(item.pubDate).getTime() : Date.now(),
         }
-    }) as CacheItem[]
+    }) as CacheItem[];
     await cache.merge(newEvents);
     return newItems.map(item => {
         if (!isFeedItem(item)) {
@@ -67,7 +70,7 @@ export const fetchRss = async (env: RssEnv, lastServiceItem: ServiceItem | null)
             type: "rss",
             title: item.title,
             url: item.link,
-            unixTimeMs: item.pubDate.getTime(),
+            unixTimeMs: new Date(item.pubDate).getTime(),
         };
     });
 }
