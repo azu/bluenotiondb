@@ -99,6 +99,15 @@
                placeholder="https://example.test/you.ical"><br>
     </div>
     <div>
+        <h2>RSS Feed</h2>
+        <p>If you want to sync RSS, fill the RSS Feed Url.</p>
+        <label for="calendar_url">RSS URL:</label><br>
+        <input type="text"
+               id="rss_url"
+               name="rss_url"
+               placeholder="https://example.test/feed.rss"><br>
+    </div>
+    <div>
         <h2>Generated env(click and copy)</h2>
         <textarea id="generated_env" cols="30" rows="10" readonly></textarea>
     </div>
@@ -132,6 +141,12 @@
             'notion_database_id',
             'notion_api_key',
             'calendar_url',
+        ],
+        // RSS
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'rss_url',
         ]
     ];
 

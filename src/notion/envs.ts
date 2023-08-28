@@ -3,8 +3,9 @@ import { assertNotionEnv } from "./Notion.js";
 import { GitHubSearchEnv } from "../services/github_search.js";
 import { GitHubEnv } from "../services/github.js";
 import { CalendarEnv } from "../services/calendar.js";
+import { RssEnv } from "../services/rss.js";
 
-export type SupportedEnv = BlueSkyEnv | GitHubEnv | GitHubSearchEnv | CalendarEnv;
+export type SupportedEnv = BlueSkyEnv | GitHubEnv | GitHubSearchEnv | CalendarEnv | RssEnv;
 export const parserEnvs = () => {
     const env = process.env.BLUE_NOTION_ENVS;
     if (env === undefined) {
