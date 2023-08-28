@@ -67,7 +67,7 @@ on:
   workflow_dispatch:
 
 env:
-  BLUE_NOTION_VERSION: v0.7.1
+  BLUE_NOTION_VERSION: v0.8.0
 
 permissions:
   contents: none
@@ -137,7 +137,7 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 env:
-  BLUE_NOTION_VERSION: v0.7.1
+  BLUE_NOTION_VERSION: v0.8.0
 
 permissions:
   contents: none
