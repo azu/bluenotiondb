@@ -20,10 +20,10 @@ I want to create sync DB for Bluesky or Twitter etc...
     - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
 - iCal calendar like [Google Calendar](https://calendar.google.com/)
     - Pull events from iCal and push to Notion
-    - **Required**: need to setup `actions/cache` action
+    - **Required**: need to setup `actions/cache` action to prevent duplicated items
 - RSS Feeds
     - Pull posts from RSS Feeds and push to Notion
-    - **Required**: need to setup `actions/cache` action
+    - **Required**: need to setup `actions/cache` action to prevent duplicated items
 
 ## Usage
 
