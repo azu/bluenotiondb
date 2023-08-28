@@ -141,7 +141,7 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
 
 export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
     const isDryRun = Boolean(process.env.BLUE_NOTION_DRY_RUN);
-    let count = 0;
+    let count = 1;
     for (const ir of irs) {
         try {
             info(`syncing ${count++}/${irs.length}`);

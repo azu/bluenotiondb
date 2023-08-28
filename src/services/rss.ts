@@ -67,7 +67,7 @@ export const fetchRss = async (env: RssEnv, lastServiceItem: ServiceItem | null)
             throw new Error("invalid feed item");
         }
         return {
-            type: "rss",
+            type: "RSS",
             title: item.title,
             url: item.link,
             unixTimeMs: new Date(item.pubDate).getTime(),
