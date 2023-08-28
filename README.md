@@ -113,7 +113,7 @@ For example, if you want to change `Title` to `Tasks` and `URL` to `url`, you ca
 For example, if you want to add `Tags` column to Notion, you can use `notion_extra` option.
 
 ```
-[..., "notion_extra":{ "Tags": { "multi_select": [{ "name": "TEST" }] }} ]
+[..., "notion_extra":{ "Tags": { "multi_select": [{ "name": "TEST" }] }}]
 ```
 
 
