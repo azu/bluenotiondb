@@ -41,6 +41,8 @@ I want to create sync DB for Bluesky or Twitter etc...
     - Note: You can change the property name by `notion_property_names` option
 3. Create Notion Integration
     - <https://www.notion.so/my-integrations>
+    - Copy the API key
+    - Also, You need to install the integration to your Notion Database
 4. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
     - <https://azu.github.io/bluenotiondb/>
 
