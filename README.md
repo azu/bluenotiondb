@@ -195,6 +195,7 @@ If you want to support a new service, you need to implement the following:
 ## Cache
 
 If future date will be added, this service should be cached.
+Otherwise, dedupe events by using last updated date.
 
 ## Development
 
