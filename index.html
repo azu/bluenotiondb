@@ -69,6 +69,30 @@
     <div>
         <h2>GitHub Search Config</h2>
         <p>If you want to sync search results, fill the search query.</p>
+        <details>
+            <summary>GitHub Search Examples</summary>
+            <p>You can use some special syntax in search query</p>
+            <ul>
+                <li><code>{{today}}</code>: today</li>
+                <li><code>{{+1day}}</code>: tomorrow</li>
+                <li><code>{{+1month}}</code>: next month</li>
+                <li><code>{{+1year}}</code>: next year</li>
+                <li><code>{{-1day}}</code>: yesterday</li>
+                <li><code>{{-1month}}</code>: last month</li>
+                <li><code>{{-1year}}</code>: last year</li>
+            </ul>
+            <h4>Examples</h4>
+            <h5>Search issues which are related to you</h5>
+            <ul>
+                <li>GitHub Search Type: <code>ISSUE</code></li>
+                <li>GitHub Search query: <code>involves:@me sort:updated-desc</code></li>
+            </ul>
+            <h5>Search Repositories which are created by you since yesterday</h5>
+            <ul>
+                <li>GitHub Search Type: <code>Repository</code></li>
+                <li>GitHub Search query: <code>user:your-account created:>={{-1day}}</code></li>
+            </ul>
+        </details>
         <label for="github_token___b">GitHub Token:</label><br>
         <input type="text" id="github_token___b"
                name="github_token___b"
@@ -82,8 +106,7 @@
         <label for="github_search_query">GitHub Search query:</label><br>
         <input type="text" id="github_search_query"
                name="github_search_query"
-               placeholder="GitHub Search query"
-               value="involves:@me sort:updated-desc"
+               placeholder="involves:@me sort:updated-desc"
         ><br>
         ✍️ <a
             href="https://docs.github.com/en/issues/tracking-your-work-with-issues/filtering-and-searching-issues-and-pull-requests"

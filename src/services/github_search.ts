@@ -142,6 +142,57 @@ export const searchGithub = ({
     });
 };
 
+type RelativeDateUnit = "day" | "month" | "year";
+/**
+ * return relative date
+ * @param value - or + value
+ * @param unit
+ */
+const relativeDate = (value: number, unit: RelativeDateUnit): Date => {
+    const now = new Date();
+    // year
+    if (unit === "year") {
+        return new Date(now.getFullYear() + value, now.getMonth(), now.getDate());
+    } else if (unit === "month") {
+        return new Date(now.getFullYear(), now.getMonth() + value, now.getDate());
+    } else if (unit === "day") {
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate() + value);
+    }
+    throw new Error("invalid unit");
+}
+const formatYYYYMMDD = (date: Date): string => {
+    // 2021-01-01
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+/**
+ * Parse search query and resolve to date
+ * @example
+ * `test created:>{{+1day}}` -> `test created:>2021-01-02`
+ * `test created:{{today}}` -> `test created:2021-01-01`
+ * @param searchQuery
+ */
+export const parserFunction = (searchQuery: string) => {
+    const relativeFunctionRegExp = /{{(?<operator>\+|-)?(?<value>\d+)(?<unit>day|month|year)}}/g;
+    const relativeFunctionMatch = searchQuery.matchAll(relativeFunctionRegExp);
+    // reverse to prevent index change
+    for (const match of [...relativeFunctionMatch].reverse()) {
+        const { operator, value, unit } = match.groups!;
+        const relativeDateValue = relativeDate(Number(`${operator}${value}`), unit as RelativeDateUnit);
+        // replace matched range to result
+        searchQuery = searchQuery.substring(0, match.index)
+            + formatYYYYMMDD(relativeDateValue)
+            + searchQuery.substring(match.index! + match[0].length);
+    }
+    // {{today}} -> 2021-01-01
+    const todayRegExp = /{{today}}/g;
+    const todayMatch = searchQuery.matchAll(todayRegExp);
+    for (const match of [...todayMatch].reverse()) {
+        searchQuery = searchQuery.substring(0, match.index)
+            + formatYYYYMMDD(new Date())
+            + searchQuery.substring(match.index! + match[0].length);
+    }
+    return searchQuery;
+}
 export const collectUntil = (searchResults: SearchResultItem[], lastServiceItem: ServiceItem): SearchResultItem[] => {
     const filteredResults: SearchResultItem[] = [];
     try {
@@ -207,7 +258,7 @@ const IGNORE_AUTHOR = ["dependabot-preview[bot]", "renovate", "dependabot[bot]"]
 export const fetchGitHubSearch = async (env: GitHubSearchEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
     // fetch
     const searchResults = await searchGithub({
-        query: env.github_search_query,
+        query: parserFunction(env.github_search_query),
         type: env.github_search_type,
         GITHUB_TOKEN: env.github_token,
         size: 20

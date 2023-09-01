@@ -8,7 +8,8 @@
     "dry-run": "CACHE_DIR=$(pwd)/.cache DEBUG=1 BLUE_NOTION_DRY_RUN=true bun run src/index.ts",
     "ci:dry-run": "CACHE_DIR=$(pwd)/.cache BLUE_NOTION_DRY_RUN=true bun run src/index.ts",
     "dist": "bun build src/index.ts --compile --outfile bluenotiondb",
-    "test": "eslint \"**/*.ts\"",
+    "lint": "eslint \"**/*.ts\"",
+    "test": "bun test",
     "postversion": "npm run sync-version",
     "sync-version": "bash ./scripts/sync-version.sh"
   },
