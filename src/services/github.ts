@@ -12,6 +12,7 @@ export type GitHubEnv = {
     github_token: string;
     github_username: string;
 } & NotionEnv;
+export const GitHubType = "GitHub" as const;
 export const isGithubEnv = (env: any): env is GitHubEnv => {
     return typeof env.github_token === "string" && typeof env.github_username === "string";
 }
@@ -129,7 +130,7 @@ const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
     // @ts-expect-error
     const parsed = parse(result);
     return {
-        type: "GitHub",
+        type: GitHubType,
         title: body ? `${title}\n\n${body}` : title,
         url: parsed?.html_url ?? "https://",
         unixTimeMs: result.created_at ? new Date(result.created_at).getTime() : 0,

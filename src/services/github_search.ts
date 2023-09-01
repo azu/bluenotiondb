@@ -14,6 +14,7 @@ export type GitHubSearchEnv = {
 export const isGitHubSearchEnv = (env: any): env is GitHubSearchEnv => {
     return typeof env.github_token === "string" && typeof env.github_search_query === "string";
 }
+export const GitHubSearchType = "GitHubSearch";
 type SearchResultRepo = {
     __typename: "Repository";
     url: string;

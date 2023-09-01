@@ -168,6 +168,13 @@ jobs:
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
 ```
 
+### Overwrite `type` column
+
+If you want to overwrite built-in `type` column, you can use `notion_extra` option.
+
+```bash
+BLUE_NOTION_ENVS='[{"notion_database_id":"xxx","notion_api_key":"xxx","rss_url":"https://rsshub.app/github/repos/azu","notion_extra":{"Type":{"select":{"name":"My GitHub Repository"}}}}]'
+```
 
 ## Related
 

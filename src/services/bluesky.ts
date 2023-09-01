@@ -10,6 +10,7 @@ export type BlueSkyEnv = {
     bluesky_app_password: string;
 
 } & NotionEnv;
+export const BlueskyType = "Bluesky";
 export const isBlueSkyEnv = (env: unknown): env is BlueSkyEnv => {
     return (env as BlueSkyEnv).bluesky_identifier !== undefined && (env as BlueSkyEnv).bluesky_app_password !== undefined;
 }
@@ -26,7 +27,7 @@ export const convertPostToServiceIr = (post: PostView): ServiceItem => {
     const did = match[1];
     const contentId = match[2];
     return {
-        type: "Bluesky",
+        type: BlueskyType,
         // at://did:plc:niluiwex7fsnjak2wxs4j47y/app.bsky.feed.post/3jz3xglxhzu27@@azu.bsky.social
         title: record.text,
         url: `https://bsky.app/profile/${did}/post/${contentId}`,

@@ -2,6 +2,7 @@ import { Client, LogLevel } from "@notionhq/client";
 import type { ServiceItem } from "../common/Interface.js";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints.js";
 import { errorLog, info } from "../common/logger.js";
+import { SupportedEnv, typeOfEnv } from "./envs.js";
 
 type PropertyValueType = {
     multi_select: {
@@ -27,13 +28,13 @@ export type NotionEnv = {
      * @example
      * { "Title": "Tasks", "URL": "url" }
      */
-    notion_property_names: NotionPropertyNames;
+    notion_property_names?: NotionPropertyNames;
     /**
      * Note: Same property name will be overwritten
      * @example
      * { "Tags" { "multi_select": [{ "name": "foo" }] }
      */
-    notion_extra: NotionExtra;
+    notion_extra?: NotionExtra;
 }
 export const assertNotionEnv = (env: any): void => {
     if (env.notion_database_id === undefined) {
@@ -61,7 +62,8 @@ const getNotionPropertyNames = (env: NotionEnv): NotionPropertyNames => {
         "URL": notionPropertyNames.URL ?? originalPropertyNames.URL,
     }
 }
-export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem> => {
+export const fetchLastPage = async (env: SupportedEnv): Promise<null | ServiceItem> => {
+    const envType = typeOfEnv(env);
     const notion = new Client({
         auth: env.notion_api_key,
         logLevel: LogLevel.WARN,
@@ -75,6 +77,12 @@ export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem>
                 timestamp: "created_time",
             }
         ],
+        filter: {
+            property: "Type",
+            select: {
+                equals: envType,
+            }
+        },
         page_size: 1,
     });
     if (queryDatabaseResponsePromise.results.length === 0) {
@@ -84,7 +92,7 @@ export const fetchLastPage = async (env: NotionEnv): Promise<null | ServiceItem>
         const result = queryDatabaseResponsePromise.results[0] as PageObjectResponse;
         // This database is not only bluenotiondb.
         // Maybe the first page is not bluenotiondb.
-        if(!result.properties[propertyNames.Date] || !result.properties[propertyNames.Type] || !result.properties[propertyNames.Title]){
+        if (!result.properties[propertyNames.Date] || !result.properties[propertyNames.Type] || !result.properties[propertyNames.Title]) {
             return null;
         }
         // Notion Date does not have seconds

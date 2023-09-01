@@ -6,6 +6,7 @@ import { createCache } from "../common/cache.js";
 export type CalendarEnv = {
     calendar_url: string;
 } & NotionEnv;
+export const CalendarType = "calendar";
 // Days to fetch from today
 const FETCH_DAYS = 28;
 export const isCalendarEnv = (env: any): env is CalendarEnv => {
@@ -82,7 +83,7 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
     await cache.write(newCache);
     return newEvents.map(item => {
         return {
-            type: "calendar",
+            type: CalendarType,
             title: item.title,
             url: item.url,
             unixTimeMs: item.unixTimeMs,

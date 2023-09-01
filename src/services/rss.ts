@@ -7,6 +7,7 @@ import { createCache } from "../common/cache.js";
 export type RssEnv = {
     rss_url: string;
 } & NotionEnv;
+export const RSSType = "RSS" as const;
 export const isRssEnv = (env: any): env is RssEnv => {
     return typeof env.rss_url === "string";
 }
@@ -67,7 +68,7 @@ export const fetchRss = async (env: RssEnv, lastServiceItem: ServiceItem | null)
             throw new Error("invalid feed item");
         }
         return {
-            type: "RSS",
+            type: RSSType,
             title: item.title,
             url: item.link,
             unixTimeMs: new Date(item.pubDate).getTime(),
