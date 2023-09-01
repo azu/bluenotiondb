@@ -37,7 +37,7 @@ const fetchService = async (env: SupportedEnv, lastItem: ServiceItem | null): Pr
         }
         throw error;
     }
-    throw new Error("unsupported env");
+    throw new Error("unsupported env:" + (env as { Type: "invalid" }).Type);
 }
 const envs = parserEnvs();
 for (const env of envs) {

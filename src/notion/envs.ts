@@ -23,7 +23,7 @@ export const typeOfEnv = (env: SupportedEnv) => {
     } else if (isRssEnv(env)) {
         return RSSType;
     }
-    throw new Error("unknown env type");
+    throw new Error("unknown env type" + (env as { Type: "invalid" }).Type);
 }
 
 export const parserEnvs = () => {
