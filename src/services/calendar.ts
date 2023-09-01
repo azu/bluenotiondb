@@ -36,8 +36,8 @@ const updateCacheEvents = ({
             id: item.uid,
         }
     }));
-    // remove old cache - before 1 week
-    const yesterday = new Date(today.getTime() - (24 * 60 * 60 * 1000) * 7);
+    // remove old cache - before FETCH_DAYS
+    const yesterday = new Date(today.getTime() - (24 * 60 * 60 * 1000) * FETCH_DAYS);
     return newCache.filter(item => {
         return item.unixTimeMs >= yesterday.getTime();
     });
