@@ -9,7 +9,7 @@ export type SupportedEnv = BlueSkyEnv | GitHubEnv | GitHubSearchEnv | CalendarEn
 export const typeOfEnv = (env: SupportedEnv) => {
     // @ts-expect-error: notion_extra is not defined in SupportedEnv
     const notionExtraType = env.notion_extra?.Type.select?.name;
-    if (notionExtraType !== undefined) {
+    if (typeof notionExtraType === "string") {
         return notionExtraType;
     }
     if (isBlueSkyEnv(env)) {
