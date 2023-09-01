@@ -192,6 +192,10 @@ If you want to support a new service, you need to implement the following:
 3. Add Env type to `notion/envs.ts`
 4. Add `fetch~` to `index.ts`
 
+## Cache
+
+If future date will be added, this service should be cached.
+
 ## Development
 
 To install dependencies:
