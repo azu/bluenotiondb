@@ -27,9 +27,10 @@ export const typeOfEnv = (env: SupportedEnv) => {
 }
 
 export const parserEnvs = () => {
-    const env = process.env.BLUE_NOTION_ENVS;
+    // "BLUEMOTION" is official name
+    const env = process.env.BLUENOTION_ENVS || process.env.BLUE_NOTION_ENVS;
     if (env === undefined) {
-        throw new Error("env BLUE_NOTION_ENVS is undefined");
+        throw new Error("env BLUENOTION_ENVS is undefined");
     }
     const envs = JSON.parse(env);
     for (const e of envs) {

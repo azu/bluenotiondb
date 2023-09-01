@@ -1,6 +1,6 @@
 # bluenotiondb
 
-Sync any service to Notion.
+BluenotionDB Sync any service to Notion using Cron services like GitHub Actions.
 
 ## Purpose
 
@@ -43,13 +43,13 @@ I want to create sync DB for Bluesky or Twitter etc...
     - <https://www.notion.so/my-integrations>
     - Copy the API key
     - Also, You need to install the integration to your Notion Database
-4. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+4. Create `BLUENOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
     - <https://azu.github.io/bluenotiondb/>
 
 ### via CLI
 
 ```bash
-$ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
+$ BLUENOTION_ENVS='[...]' ./bluenotiondb
 ```
 
 ### via GitHub Actions
@@ -57,7 +57,7 @@ $ BLUE_NOTION_ENVS='[...]' ./bluenotiondb
 1. Create GitHub repository
 2. Put `.github/workflows/update.yml` to the repository
 3. Copy from <https://github.com/azu/bluenotiondb/releases/latest> and Paste to `.github/workflows/update.yml`
-4. Set `BLUE_NOTION_ENVS` to GitHub repository secret
+4. Set `BLUENOTION_ENVS` to GitHub repository secret
 
 ```yaml
 name: Update
@@ -71,7 +71,7 @@ on:
   workflow_dispatch:
 
 env:
-  BLUE_NOTION_VERSION: v0.9.0
+  BLUENOTION_VERSION: v0.9.0
 
 permissions:
   contents: none
@@ -81,12 +81,12 @@ jobs:
     steps:
       - name: Download
         run: |
-          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
         run: ./bluenotiondb
         env:
-          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+          BLUENOTION_ENVS: ${{ secrets.BLUENOTION_ENVS }}
 ```
 
 ## Advanced Usage
@@ -129,7 +129,7 @@ You can use unicode escape sequence like `\u30bf\u30b9\u30af\u540d` instead of n
 ### Sync Google Calendar to Notion
 
 1. Copy your iCal URL from Google Calendar
-2. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+2. Create `BLUENOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
     - <https://azu.github.io/bluenotiondb/>
 3. Create Update Calendar workflow
 
@@ -141,7 +141,7 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 env:
-  BLUE_NOTION_VERSION: v0.9.0
+  BLUENOTION_VERSION: v0.9.0
 
 permissions:
   contents: none
@@ -159,13 +159,13 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}
       - name: Download
         run: |
-          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
         run: ./bluenotiondb > /dev/null 2>&1
         env:
           CACHE_DIR: ${{ github.workspace }}/cache # require absolute path
-          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+          BLUENOTION_ENVS: ${{ secrets.BLUENOTION_ENVS }}
 ```
 
 ### Overwrite `type` column
@@ -173,7 +173,7 @@ jobs:
 If you want to overwrite built-in `type` column, you can use `notion_extra` option.
 
 ```bash
-BLUE_NOTION_ENVS='[{"notion_database_id":"xxx","notion_api_key":"xxx","rss_url":"https://rsshub.app/github/repos/azu","notion_extra":{"Type":{"select":{"name":"My GitHub Repository"}}}}]'
+BLUENOTION_ENVS='[{"notion_database_id":"xxx","notion_api_key":"xxx","rss_url":"https://rsshub.app/github/repos/azu","notion_extra":{"Type":{"select":{"name":"My GitHub Repository"}}}}]'
 ```
 
 ## Related
@@ -214,11 +214,11 @@ bun install
 
 To use local env:
 
-1. Create `BLUE_NOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
-2. Crate `.env` file and paste `BLUE_NOTION_ENVS` to `.env`
+1. Create `BLUENOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+2. Crate `.env` file and paste `BLUENOTION_ENVS` to `.env`
 
 ```bash
-BLUE_NOTION_ENVS='[...]'
+BLUENOTION_ENVS='[...]'
 ````
 
 To run:

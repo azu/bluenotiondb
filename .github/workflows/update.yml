@@ -4,7 +4,7 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch:
 env:
-  BLUE_NOTION_VERSION: v0.9.0
+  BLUENOTION_VERSION: v0.9.0
 
 permissions:
   contents: none
@@ -14,9 +14,9 @@ jobs:
     steps:
       - name: Download
         run: |
-          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
         run: ./bluenotiondb > /dev/null 2>&1
         env:
-          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_UPDATE }}
+          BLUENOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_UPDATE }}

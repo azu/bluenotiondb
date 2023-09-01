@@ -39,7 +39,7 @@ jobs:
                 - cron: "*/30 * * * *"
               workflow_dispatch:
             env:
-              BLUE_NOTION_VERSION: ${{steps.get_tag_name.outputs.tag_name}}
+              BLUENOTION_VERSION: ${{steps.get_tag_name.outputs.tag_name}}
             
             permissions:
               contents: none
@@ -49,11 +49,11 @@ jobs:
                 steps:
                   - name: Download
                     run: |
-                      curl -L https://github.com/azu/bluenotiondb/releases/download/${{ '${{env.BLUE_NOTION_VERSION}}' }}/bluenotiondb -o bluenotiondb
+                      curl -L https://github.com/azu/bluenotiondb/releases/download/${{ '${{env.BLUENOTION_VERSION}}' }}/bluenotiondb -o bluenotiondb
                       chmod +x bluenotiondb
                   - name: Update
                     run: ./bluenotiondb
                     env:
-                      BLUE_NOTION_ENVS: ${{ '${{secrets.BLUE_NOTION_ENVS}}' }}
+                      BLUENOTION_ENVS: ${{ '${{secrets.BLUENOTION_ENVS}}' }}
             ```
 
