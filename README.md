@@ -162,7 +162,8 @@ jobs:
           cache-name: cache-bluenotion-calendar
         with:
           path: ./cache
-          key: ${{ runner.os }}-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/cache/**') }}
+          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
       - name: Download
         run: |
           curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
@@ -170,7 +171,7 @@ jobs:
       - name: Update
         run: ./bluenotiondb > /dev/null 2>&1
         env:
-          CACHE_DIR: ${{ github.workspace }}/cache # require absolute path
+          CACHE_DIR: ./cache
           BLUENOTION_ENVS: ${{ secrets.BLUENOTION_ENVS }}
 ```
 
