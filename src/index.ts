@@ -1,7 +1,7 @@
 import { fetchBluesky, isBlueSkyEnv } from "./services/bluesky.js";
 import { fetchLastPage, syncToNotion } from "./notion/Notion.js";
 import { parserEnvs, SupportedEnv, typeOfEnv } from "./notion/envs.js";
-import { ServiceItem } from "./common/Interface.js";
+import { ServiceItem } from "./common/ServiceItem.js";
 import { debug, info, warn } from "./common/logger.js";
 import { fetchGitHubSearch, isGitHubSearchEnv } from "./services/github_search.js";
 import { fetchGitHubEvents, isGithubEnv } from "./services/github.js";

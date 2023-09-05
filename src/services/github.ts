@@ -1,4 +1,4 @@
-import { ServiceItem } from "../common/Interface.js";
+import { ServiceItem } from "../common/ServiceItem.js";
 import { NotionEnv } from "../notion/Notion.js";
 import { Octokit } from "@octokit/rest";
 import { createLogger } from "../common/logger.js";

@@ -1,5 +1,5 @@
 import { Client, LogLevel } from "@notionhq/client";
-import type { ServiceItem } from "../common/Interface.js";
+import type { ServiceItem } from "../common/ServiceItem.js";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints.js";
 import { errorLog, info } from "../common/logger.js";
 import { SupportedEnv, typeOfEnv } from "./envs.js";
@@ -17,6 +17,7 @@ type NotionPropertyNames = {
     Type: string;
     Date: string;
     URL: string;
+    Parent: string;
 }
 export type NotionEnv = {
     notion_database_id: string;
@@ -50,6 +51,7 @@ const getNotionPropertyNames = (env: NotionEnv): NotionPropertyNames => {
         "Type": "Type",
         "Date": "Date",
         "URL": "URL",
+        "Parent": "Parent"
     };
     if (env.notion_property_names === undefined) {
         return originalPropertyNames;
@@ -60,6 +62,7 @@ const getNotionPropertyNames = (env: NotionEnv): NotionPropertyNames => {
         "Type": notionPropertyNames.Type ?? originalPropertyNames.Type,
         "Date": notionPropertyNames.Date ?? originalPropertyNames.Date,
         "URL": notionPropertyNames.URL ?? originalPropertyNames.URL,
+        "Parent": notionPropertyNames.Parent ?? originalPropertyNames.Parent,
     }
 }
 export const fetchLastPage = async (env: SupportedEnv): Promise<null | ServiceItem> => {
@@ -120,6 +123,34 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
     const extra = env.notion_extra ?? {};
     const NOTION_MAX_TITLE_LENGTH = 2000;
     const notionPropertyNames = getNotionPropertyNames(env);
+
+    const parentRelation = await (async () => {
+        if (!ir.parent) return undefined;
+
+        const parentPage = await notion.databases.query({
+            database_id: env.notion_database_id,
+            sorts: [
+                {
+                    property: "Date",
+                    direction: "descending",
+                    timestamp: "created_time",
+                }
+            ],
+            filter: {
+                property: notionPropertyNames.URL,
+                url: {
+                    equals: ir.parent.url,
+                }
+            },
+            page_size: 1,
+        });
+        if (parentPage.results.length === 0) {
+            return undefined;
+        }
+        return {
+            page_id: parentPage.results[0].id,
+        }
+    })();
     const properties = {
         [notionPropertyNames.Title]: {
             title: typeof ir.title === "string"
@@ -137,6 +168,13 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
         },
         ...(ir.url === undefined ? {} : {
             [notionPropertyNames.URL]: { url: ir.url },
+        }),
+        ...(parentRelation === undefined ? {} : {
+            [notionPropertyNames.Parent]: {
+                relation: [{
+                    id: parentRelation.page_id,
+                }]
+            },
         }),
         // extra will overwrite the same property name
         ...extra,

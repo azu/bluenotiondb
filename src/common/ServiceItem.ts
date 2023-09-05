@@ -9,4 +9,8 @@ export type ServiceItem = {
     title: string | TitleProperty["title"];
     unixTimeMs: number;
     url?: string;
+    // If the service is a child of another service, this will be the parent service's url
+    parent?: {
+        url: string;
+    };
 }

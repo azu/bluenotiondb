@@ -1,6 +1,6 @@
 import ical from "node-ical"
 import { NotionEnv } from "../notion/Notion.js";
-import { ServiceItem } from "../common/Interface.js";
+import { ServiceItem } from "../common/ServiceItem.js";
 import { createCache } from "../common/cache.js";
 
 export type CalendarEnv = {

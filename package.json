@@ -24,7 +24,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@atproto/api": "^0.4.3",
+    "@atproto/api": "^0.6.10",
     "@notionhq/client": "^2.2.8",
     "@octokit/graphql": "^7.0.1",
     "@octokit/graphql-schema": "^14.25.0",

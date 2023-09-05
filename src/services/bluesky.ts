@@ -1,6 +1,6 @@
 import { AppBskyFeedGetAuthorFeed, BskyAgent } from "@atproto/api";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
-import { ServiceItem } from "../common/Interface.js";
+import { ServiceItem } from "../common/ServiceItem.js";
 import { NotionEnv } from "../notion/Notion.js";
 import { createLogger } from "../common/logger.js";
 
@@ -14,24 +14,46 @@ export const BlueskyType = "Bluesky";
 export const isBlueSkyEnv = (env: unknown): env is BlueSkyEnv => {
     return (env as BlueSkyEnv).bluesky_identifier !== undefined && (env as BlueSkyEnv).bluesky_app_password !== undefined;
 }
+const convertHttpUrlFromAtProto = (url: string): string => {
+    const match = url.match(/at:\/\/(did:plc:.*?)\/app.bsky.feed.post\/(.*)/);
+    if (match === null) {
+        throw new Error(`post.uri is invalid: ${url}`);
+    }
+    const did = match[1];
+    const contentId = match[2];
+    return `https://bsky.app/profile/${did}/post/${contentId}`
+}
+const getRootPost = (post: PostView): { url: string; } | undefined => {
+    // @ts-expect-error no reply type
+    if (!post.record?.reply?.root) {
+        return undefined;
+    }
+    // @ts-expect-error no reply type
+    const url = convertHttpUrlFromAtProto(post.record.reply.root.uri);
+    return {
+        url,
+    }
+}
 // Issue: https://github.com/bluesky-social/atproto/issues/910
-export const convertPostToServiceIr = (post: PostView): ServiceItem => {
+export const convertPostToServiceIr = (post: PostView, identifier: string): ServiceItem => {
     const record = post.record as { text?: string };
     if (typeof record.text !== "string") {
         throw new Error("post.record.text is not string");
     }
-    const match = post.uri.match(/at:\/\/(did:plc:.*?)\/app.bsky.feed.post\/(.*)/);
-    if (match === null) {
-        throw new Error(`post.uri is invalid: ${post.uri}`);
-    }
-    const did = match[1];
-    const contentId = match[2];
+    // if post is reply, get root post
+    const rootPost = getRootPost(post);
     return {
         type: BlueskyType,
         // at://did:plc:niluiwex7fsnjak2wxs4j47y/app.bsky.feed.post/3jz3xglxhzu27@@azu.bsky.social
         title: record.text,
-        url: `https://bsky.app/profile/${did}/post/${contentId}`,
-        unixTimeMs: new Date(post.indexedAt).getTime()
+        url: convertHttpUrlFromAtProto(post.uri),
+        unixTimeMs: new Date(post.indexedAt).getTime(),
+        // if the reply is self post
+        ...(rootPost ? {
+            parent: {
+                url: rootPost.url
+            },
+        } : {})
     };
 };
 
@@ -116,7 +138,7 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
         feed: []
     });
     const convertedPosts = feed.map((post) => {
-        return convertPostToServiceIr(post.post);
+        return convertPostToServiceIr(post.post, env.bluesky_identifier);
     })
     const sortedPosts = convertedPosts.sort((a, b) => {
         return a.unixTimeMs > b.unixTimeMs ? -1 : 1;

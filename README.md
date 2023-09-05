@@ -36,9 +36,12 @@ I want to create sync DB for Bluesky or Twitter etc...
         - Also, It should enable "Time"
     - `URL`: URL type column
     - `Type`: Select type column
-        - Type will be service name
+      - Type will be service name
+    - `Parent`: Parent type column
+      - Enable "Sub Item" in Notion Table
+      - It will be used for reply representation
     - ![img.png](docs/img.png)
-    - Note: You can change the property name by `notion_property_names` option
+      - Note: You can change the property name by `notion_property_names` option
 3. Create Notion Integration
     - <https://www.notion.so/my-integrations>
     - Copy the API key
@@ -101,6 +104,9 @@ You can change the property name by `notion_property_names` option.
 - `URL`: URL type column
 - `Type`: Select type column
 - `Date`: Date type column
+- `Parent`: Parent type column
+  - Enable "Sub Item" in Notion
+  - It will be used for reply representation
 
 For example, if you want to change `Title` to `Tasks` and `URL` to `url`, you can use `notion_property_names` option.
 

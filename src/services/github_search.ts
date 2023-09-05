@@ -1,4 +1,4 @@
-import { ServiceItem } from "../common/Interface.js";
+import { ServiceItem } from "../common/ServiceItem.js";
 import { NotionEnv } from "../notion/Notion.js";
 import { graphql, GraphqlResponseError } from "@octokit/graphql";
 import { SearchResultItemConnection } from "@octokit/graphql-schema";

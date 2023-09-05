@@ -1,6 +1,6 @@
 import ical from "node-ical"
 import { NotionEnv } from "../notion/Notion.js";
-import { ServiceItem } from "../common/Interface.js";
+import { ServiceItem } from "../common/ServiceItem.js";
 import Parser from 'rss-parser';
 import { createCache } from "../common/cache.js";
 
