@@ -1,4 +1,4 @@
-import ical from "node-ical"
+import ical, { VEvent } from "node-ical"
 import { NotionEnv } from "../notion/Notion.js";
 import { ServiceItem } from "../common/ServiceItem.js";
 import { createCache } from "../common/cache.js";
@@ -43,6 +43,9 @@ const updateCacheEvents = ({
         return item.unixTimeMs >= CacheLimitDate.getTime();
     });
 }
+const hashEvent = (event: VEvent) => {
+    return Bun.hash(event.summary + "@@@" + event.start.getTime().toString()).toString();
+}
 export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
     const res = await fetch(env.calendar_url).then(res => {
         if (res.ok) {
@@ -64,9 +67,8 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
             if (event.type !== "VEVENT") {
                 throw new Error("Event type is not VEVENT");
             }
-            const hashUid = hash(event.summary + "@@@" + event.start.getTime().toString());
             return {
-                uid: hashUid.toString(),
+                uid: hashEvent(event),
                 title: event.summary,
                 url: event.url,
                 unixTimeMs: event.start.getTime(),
@@ -75,7 +77,7 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
     const cache = createCache<CacheItem>(cacheFileName);
     const cachedEvents = await cache.read();
     const newEvents = events.filter(event => {
-        return !cachedEvents.some(item => item.id === event.uid);
+        return !cachedEvents.some(item => item.id === event.uid)
     });
     const newCache = updateCacheEvents({
         oldEvents: cachedEvents,
