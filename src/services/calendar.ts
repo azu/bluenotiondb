@@ -2,6 +2,7 @@ import ical from "node-ical"
 import { NotionEnv } from "../notion/Notion.js";
 import { ServiceItem } from "../common/ServiceItem.js";
 import { createCache } from "../common/cache.js";
+import { hash } from "bun";
 
 export type CalendarEnv = {
     calendar_url: string;
@@ -63,8 +64,9 @@ export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceIt
             if (event.type !== "VEVENT") {
                 throw new Error("Event type is not VEVENT");
             }
+            const hashUid = hash(event.summary + "@@@" + event.start.getTime().toString());
             return {
-                uid: event.uid,
+                uid: hashUid.toString(),
                 title: event.summary,
                 url: event.url,
                 unixTimeMs: event.start.getTime(),
