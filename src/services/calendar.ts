@@ -44,6 +44,8 @@ const updateCacheEvents = ({
     });
 }
 const hashEvent = (event: VEvent) => {
+    // uid is not unique
+    // https://stackoverflow.com/questions/62982636/in-what-situations-could-an-ical-vevent-end-up-with-a-duplicated-uid
     return Bun.hash(event.summary + "@@@" + event.start.getTime().toString()).toString();
 }
 export const fetchCalendar = async (env: CalendarEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
