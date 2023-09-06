@@ -115,6 +115,25 @@ export const fetchLastPage = async (env: SupportedEnv): Promise<null | ServiceIt
         }
     }
 }
+
+class LruMap extends Map<string, string> {
+    private readonly maxSize: number;
+
+    constructor(maxSize: number) {
+        super();
+        this.maxSize = maxSize;
+    }
+
+    set(key: string, value: string): this {
+        if (this.size >= this.maxSize) {
+            this.delete(this.keys().next().value);
+        }
+        return super.set(key, value);
+    }
+}
+
+// <url, page_id>
+const lruMap = new LruMap(100);
 export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
     const notion = new Client({
         auth: env.notion_api_key,
@@ -127,15 +146,14 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
     const parentRelation = await (async () => {
         if (!ir.parent) return undefined;
 
+        const cachedCreatedPageId = lruMap.get(ir.parent.url);
+        if (cachedCreatedPageId) {
+            return {
+                page_id: cachedCreatedPageId,
+            }
+        }
         const parentPage = await notion.databases.query({
             database_id: env.notion_database_id,
-            sorts: [
-                {
-                    property: "Date",
-                    direction: "descending",
-                    timestamp: "created_time",
-                }
-            ],
             filter: {
                 property: notionPropertyNames.URL,
                 url: {
@@ -179,16 +197,22 @@ export const createPage = async (env: NotionEnv, ir: ServiceItem) => {
         // extra will overwrite the same property name
         ...extra,
     };
-    return notion.pages.create({
+    const createPageResponse = await notion.pages.create({
         parent: { database_id: env.notion_database_id },
         properties: properties,
-    });
+    }) as PageObjectResponse;
+    if (ir.url) {
+        lruMap.set(ir.url, createPageResponse.id);
+    }
+    return createPageResponse;
 };
 
 export const syncToNotion = async (env: NotionEnv, irs: ServiceItem[]) => {
     const isDryRun = Boolean(process.env.BLUE_NOTION_DRY_RUN);
     let count = 1;
-    for (const ir of irs) {
+    // oldest first - reply needs to be created after the original post
+    const sortedIrs = irs.sort((a, b) => a.unixTimeMs - b.unixTimeMs);
+    for (const ir of sortedIrs) {
         try {
             info(`syncing ${count++}/${irs.length}`);
             if (!isDryRun) {
