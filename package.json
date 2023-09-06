@@ -10,7 +10,7 @@
     "dist": "bun build src/index.ts --compile --outfile bluenotiondb",
     "lint": "eslint \"**/*.ts\"",
     "test": "bun test",
-    "postversion": "npm run sync-version",
+    "postversion": "npm run sync-version && git commit -m \"chore: sync version\" && git push --follow-tags",
     "sync-version": "bash ./scripts/sync-version.sh"
   },
   "devDependencies": {

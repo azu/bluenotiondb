@@ -12,4 +12,5 @@ currentPackageVersion=$(cat "${projectDir}/package.json" | jq -r '.version')
 for file in "${target_files[@]}"; do
   # without backup
   sed -i '' -e "s/BLUENOTION_VERSION: v.*/BLUENOTION_VERSION: v${currentPackageVersion}/g" "${file}"
+  git add "${file}"
 done
