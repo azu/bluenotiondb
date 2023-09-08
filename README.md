@@ -29,24 +29,12 @@ I want to create sync DB for Bluesky or Twitter etc...
 
 ## Setup Notion
 
-1. Create Notion Database
-2. Add following Properties with type
-    - `Title`: title column
-    - `Date`: Date type column
-        - Also, It should enable "Time"
-    - `URL`: URL type column
-    - `Type`: Select type column
-      - Type will be service name
-    - `Parent`: Parent type column
-      - Enable "Sub Item" in Notion Table
-      - It will be used for reply representation
-    - ![img.png](docs/img.png)
-      - Note: You can change the property name by `notion_property_names` option
-3. Create Notion Integration
+1. Duplicate [This Notion Template](https://efcl.notion.site/Demo-Bluenotion-0f9885a393874c2aa7a4765ff5ddf0be)
+2. Create Notion Integration
     - <https://www.notion.so/my-integrations>
     - Copy the API key
     - Also, You need to install the integration to your Notion Database
-4. Create `BLUENOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+3. Create `BLUENOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
     - <https://azu.github.io/bluenotiondb/>
 
 ### via CLI
