@@ -163,6 +163,7 @@ jobs:
       # `key` is always mismatched, instead of using key, use `restore-keys`
       # `restore-keys` is prefix-matched keys
       - name: Restore Cache
+        id: cache-restore
         uses: actions/cache/restore@v3
         with:
           path: ./cache
@@ -182,6 +183,12 @@ jobs:
         with:
           path: ./cache
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/cache/**') }}
+      - name: Delete Previous Cache
+        run: |
+          gh extension install actions/gh-actions-cache
+          if ${{ steps.cache-restore.outputs.cache-hit == 'true' }}; then
+            gh actions-cache delete "$KEY" --confirm
+          fi
 ```
 
 ### Overwrite `type` column
