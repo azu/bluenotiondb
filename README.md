@@ -154,25 +154,34 @@ permissions:
 jobs:
   calendar:
     runs-on: ubuntu-latest
+    env:
+      cache-name: cache-bluenotion-home
     steps:
-      # require to cache for preventing duplicate events
-      - name: Cache
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-bluenotion-calendar
+      # actions/cache does not support overwrite cache
+      # https://github.com/actions/cache/issues/342
+      # this job create new cache key when updated, and use prefix-matched keys
+      # `key` is always mismatched, instead of using key, use `restore-keys`
+      # `restore-keys` is prefix-matched keys
+      - name: Restore Cache
+        uses: actions/cache/restore@v3
         with:
           path: ./cache
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/cache/**') }}
+          key: FAILED_MATCH_KEY
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
       - name: Download
         run: |
-          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
-        run: ./bluenotiondb > /dev/null 2>&1
+        run: ./bluenotiondb  > /dev/null 2>&1
         env:
           CACHE_DIR: ./cache
-          BLUENOTION_ENVS: ${{ secrets.BLUENOTION_ENVS }}
+          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+      - name: Save Cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/cache/**') }}
 ```
 
 ### Overwrite `type` column
