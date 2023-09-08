@@ -150,7 +150,8 @@ env:
   BLUENOTION_VERSION: v0.10.3
 
 permissions:
-  contents: none
+  contents: read
+  actions: write # require to delete cache
 jobs:
   calendar:
     runs-on: ubuntu-latest
@@ -159,16 +160,15 @@ jobs:
     steps:
       # actions/cache does not support overwrite cache
       # https://github.com/actions/cache/issues/342
-      # this job create new cache key when updated, and use prefix-matched keys
-      # `key` is always mismatched, instead of using key, use `restore-keys`
-      # `restore-keys` is prefix-matched keys
+      # This job implement overwrite cache using restore + delete + save
+      - name: Checkout
+        uses: actions/checkout@v3 # gh command require repository
       - name: Restore Cache
         id: cache-restore
         uses: actions/cache/restore@v3
         with:
           path: ./cache
-          key: FAILED_MATCH_KEY
-          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+          key: ${{ env.cache-name }}
       - name: Download
         run: |
           curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
@@ -178,17 +178,22 @@ jobs:
         env:
           CACHE_DIR: ./cache
           BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+      # overwrite cache key
+      - name: Delete Previous Cache
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh extension install actions/gh-actions-cache
+          if ${{ steps.cache-restore.outputs.cache-hit == 'true' }}; then
+            gh actions-cache delete "${{ env.cache-name }}" --confirm
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Save Cache
         uses: actions/cache/save@v3
         with:
           path: ./cache
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/cache/**') }}
-      - name: Delete Previous Cache
-        run: |
-          gh extension install actions/gh-actions-cache
-          if ${{ steps.cache-restore.outputs.cache-hit == 'true' }}; then
-            gh actions-cache delete "$KEY" --confirm
-          fi
+          key: ${{ env.cache-name }}
 ```
 
 ### Overwrite `type` column
