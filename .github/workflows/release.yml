@@ -52,7 +52,7 @@ jobs:
                       curl -L https://github.com/azu/bluenotiondb/releases/download/${{ '${{env.BLUENOTION_VERSION}}' }}/bluenotiondb -o bluenotiondb
                       chmod +x bluenotiondb
                   - name: Update
-                    run: ./bluenotiondb
+                    run: ./bluenotiondb > /dev/null 2>&1
                     env:
                       BLUENOTION_ENVS: ${{ '${{secrets.BLUENOTION_ENVS}}' }}
             ```
