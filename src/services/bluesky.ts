@@ -97,7 +97,6 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
         feed: Feed;
         cursor?: string;
     };
-    // collect feed 50 * 20
     const fetchAuthorFeed = async ({ actor, feed, cursor }: FetchAuthorFeedParams): Promise<Feed> => {
         try {
             const timeline = await agent.getAuthorFeed({
