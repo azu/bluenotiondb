@@ -90,6 +90,16 @@ export async function fetchBluesky(env: BlueSkyEnv, lastServiceItem: ServiceItem
     await agent.login({
         identifier: env.bluesky_identifier,
         password: env.bluesky_app_password
+    }).catch((error) => {
+        logger.error("login error", {
+            status: error.status,
+            error: error.error,
+            // filter `ratelimit-*` headers
+            rateLimitHeaders: Object.fromEntries(Object.entries(error.headers).filter(([key]) => {
+                return key.startsWith("ratelimit-")
+            })),
+        });
+        throw error;
     });
 
     type FetchAuthorFeedParams = {
