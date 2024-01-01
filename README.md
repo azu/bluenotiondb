@@ -18,6 +18,7 @@ I want to create sync DB for Bluesky or Twitter etc...
     - Open/Close/Comment of Issues/PRs etc...
 - [GitHub Search](https://github.com/search)
     - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
+    - **Required**: need to setup `actions/cache` action to prevent duplicated items
 - iCal calendar like [Google Calendar](https://calendar.google.com/)
     - Pull events from iCal and push to Notion
     - **Required**: need to setup `actions/cache` action to prevent duplicated items
@@ -144,13 +145,76 @@ jobs:
   calendar:
     runs-on: ubuntu-latest
     env:
-      cache-name: cache-bluenotion-home
+      cache-name: cache-bluenotion-calendar
     steps:
       # actions/cache does not support overwrite cache
       # https://github.com/actions/cache/issues/342
       # This job implement overwrite cache using restore + delete + save
       - name: Checkout
         uses: actions/checkout@v3 # gh command require repository
+      - name: Restore Cache
+        id: cache-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: ./cache
+          key: ${{ env.cache-name }}
+      - name: Download
+        run: |
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          chmod +x bluenotiondb
+      - name: Update
+        run: ./bluenotiondb  > /dev/null 2>&1
+        env:
+          CACHE_DIR: ./cache
+          BLUE_NOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS }}
+      # overwrite cache key
+      - name: Delete Previous Cache
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete "${{ env.cache-name }}" --confirm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Save Cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./cache
+          key: ${{ env.cache-name }}
+```
+
+### Sync GitHub Search Results to Notion
+
+1. Create `BLUENOTION_ENVS` env var using [bluenotiondb env generator](https://azu.github.io/bluenotiondb/)
+    - e.g. Fetch your assigned Issue and PR
+      - Query: `assignee:@me state:open`
+      - Type: `Issues`
+2. Create Update GitHub Search workflow
+
+```yaml
+name: Update GitHub Search
+on:
+  schedule:
+    # every hour
+    - cron: "0 * * * *"
+  workflow_dispatch:
+env:
+  BLUENOTION_VERSION: v1.1.0
+
+permissions:
+  contents: read
+  actions: write # require to delete cache
+jobs:
+  calendar:
+    runs-on: ubuntu-latest
+    env:
+      cache-name: cache-bluenotion-github-search
+    steps:
+      # actions/cache does not support overwrite cache
+      # https://github.com/actions/cache/issues/342
+      # This job implement overwrite cache using restore + delete + save
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Restore Cache
         id: cache-restore
         uses: actions/cache/restore@v3

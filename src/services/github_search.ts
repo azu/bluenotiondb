@@ -4,6 +4,7 @@ import { graphql, GraphqlResponseError } from "@octokit/graphql";
 import { SearchResultItemConnection } from "@octokit/graphql-schema";
 import { createLogger } from "../common/logger.js";
 import { RetryAbleError } from "../common/RetryAbleError.js";
+import { createCache } from "../common/cache.ts";
 
 const logger = createLogger("GitHubSearch");
 export type GitHubSearchEnv = {
@@ -17,6 +18,7 @@ export const isGitHubSearchEnv = (env: any): env is GitHubSearchEnv => {
 export const GitHubSearchType = "GitHubSearch";
 type SearchResultRepo = {
     __typename: "Repository";
+    id: string;
     url: string;
     name: string;
     nameWithOwner: string;
@@ -31,6 +33,7 @@ type SearchResultRepo = {
 }
 type SearchResultIssueOrPullRequest = {
     __typename: "PullRequest" | "Issue";
+    id: string;
     number: number;
     url: string;
     title: string;
@@ -57,66 +60,72 @@ export const searchGithub = ({
                                  size,
                                  type,
                                  GITHUB_TOKEN
-                             }: { query: string, size: number; type: GitHubSearchEnv["github_search_type"]; GITHUB_TOKEN: string }): Promise<SearchResultItem[]> => {
+                             }: {
+    query: string,
+    size: number;
+    type: GitHubSearchEnv["github_search_type"];
+    GITHUB_TOKEN: string
+}): Promise<SearchResultItem[]> => {
     return graphql<{ search: SearchResultItemConnection }>(
-        `
-            query($QUERY: String!, $TYPE: SearchType!, $SIZE: Int!) {
-                search(query: $QUERY, type: $TYPE, first: $SIZE) {
-                    edges {
-                        node {
-                            __typename
-                            ... on Repository {
-                                url
-                                name
-                                nameWithOwner
-                                createdAt
-                                updatedAt
-                            }
-                            ... on PullRequest {
-                                number
-                                url
-                                title
-                                createdAt
-                                updatedAt
-                                state
-                                author {
-                                    login
-                                }
-                                repository {
-                                    nameWithOwner
-                                }
-                                comments(last: 1) {
-                                  nodes {
-                                    url
-                                  }
-                                }
-                            }
-                            ... on Issue {
-                                number
-                                url
-                                title
-                                createdAt
-                                updatedAt
-                                state
-                                author {
-                                    avatarUrl
-                                    login
-                                    url
-                                }
-                                repository {
-                                    nameWithOwner
-                                }
-                                comments(last: 1) {
-                                  nodes {
-                                    url
-                                  }
-                                }
-                            }
-                        }
-                    }
-                }
+        `query ($QUERY: String!, $TYPE: SearchType!, $SIZE: Int!) {
+  search(query: $QUERY, type: $TYPE, first: $SIZE) {
+    edges {
+      node {
+        __typename
+        ... on Repository {
+          id
+          url
+          name
+          nameWithOwner
+          createdAt
+          updatedAt
+        }
+        ... on PullRequest {
+          id
+          number
+          url
+          title
+          createdAt
+          updatedAt
+          state
+          author {
+            login
+          }
+          repository {
+            nameWithOwner
+          }
+          comments(last: 1) {
+            nodes {
+              url
             }
-        `,
+          }
+        }
+        ... on Issue {
+          id
+          number
+          url
+          title
+          createdAt
+          updatedAt
+          state
+          author {
+            avatarUrl
+            login
+            url
+          }
+          repository {
+            nameWithOwner
+          }
+          comments(last: 1) {
+            nodes {
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+}`,
         {
             QUERY: query,
             TYPE: type,
@@ -264,18 +273,20 @@ export const fetchGitHubSearch = async (env: GitHubSearchEnv, lastServiceItem: S
         GITHUB_TOKEN: env.github_token,
         size: 20
     });
+    const cache = createCache<SearchResultItem>("github_search.json");
+    const cachedEvents = await cache.read();
     logger.info("searchResults count", searchResults.length);
-    const searchResultsWithoutIgnoredAuthor = searchResults.filter((result) => {
+    const filteredResults = searchResults.filter((result) => {
+        if (cachedEvents.some((cachedEvent) => cachedEvent.id === result.id)) {
+            return false;
+        }
         if (result.__typename === "Issue" || result.__typename === "PullRequest") {
-            return !IGNORE_AUTHOR.includes(result.author.login);
+            return !IGNORE_AUTHOR.includes(result?.author?.login);
         }
         return true;
     })
-    // filter
-    const filteredResults = lastServiceItem
-        ? collectUntil(searchResultsWithoutIgnoredAuthor, lastServiceItem)
-        : searchResultsWithoutIgnoredAuthor;
     logger.info("filtered results count", filteredResults.length)
+    await cache.write(cachedEvents.concat(filteredResults));
     // convert
     return filteredResults.map(convertSearchResultToServiceItem);
 }
