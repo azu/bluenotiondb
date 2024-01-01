@@ -63,7 +63,7 @@ on:
   workflow_dispatch:
 
 env:
-  BLUENOTION_VERSION: v1.1.0
+  BLUENOTION_VERSION: v2.0.0
 
 permissions:
   contents: none
@@ -136,7 +136,7 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 env:
-  BLUENOTION_VERSION: v1.1.0
+  BLUENOTION_VERSION: v2.0.0
 
 permissions:
   contents: read
@@ -199,7 +199,7 @@ on:
     - cron: "0 * * * *"
   workflow_dispatch:
 env:
-  BLUENOTION_VERSION: v1.1.0
+  BLUENOTION_VERSION: v2.0.0
 
 permissions:
   contents: read
