@@ -205,7 +205,7 @@ permissions:
   contents: read
   actions: write # require to delete cache
 jobs:
-  calendar:
+  github-search:
     runs-on: ubuntu-latest
     env:
       cache-name: cache-bluenotion-github-search
