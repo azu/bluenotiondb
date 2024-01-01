@@ -2,7 +2,7 @@
   "name": "bluenotiondb",
   "module": "src/index.ts",
   "type": "module",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "scripts": {
     "main": "CACHE_DIR=$(pwd)/.cache DEBUG=1 bun run src/index.ts",
     "preview": "bun run dist && CACHE_DIR=$(pwd)/.cache DEBUG=1 ./bluenotiondb",
