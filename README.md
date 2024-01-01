@@ -160,7 +160,7 @@ jobs:
           key: ${{ env.cache-name }}
       - name: Download
         run: |
-          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
         run: ./bluenotiondb  > /dev/null 2>&1
@@ -223,7 +223,7 @@ jobs:
           key: ${{ env.cache-name }}
       - name: Download
         run: |
-          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUE_NOTION_VERSION}}/bluenotiondb -o bluenotiondb
+          curl -L https://github.com/azu/bluenotiondb/releases/download/${{env.BLUENOTION_VERSION}}/bluenotiondb -o bluenotiondb
           chmod +x bluenotiondb
       - name: Update
         run: ./bluenotiondb  > /dev/null 2>&1
