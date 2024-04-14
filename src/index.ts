@@ -9,6 +9,7 @@ import { RetryAbleError } from "./common/RetryAbleError.js";
 import { RateLimitError } from "./common/RateLimitError.js";
 import { fetchCalendar, isCalendarEnv } from "./services/calendar.js";
 import { fetchRss, isRssEnv } from "./services/rss.js";
+import { fetchLinear, isLinearEnv } from "./services/linear.ts";
 
 if (Boolean(process.env.DRY_RUN)) {
     info("DRY_RUN mode");
@@ -25,6 +26,8 @@ const fetchService = async (env: SupportedEnv, lastItem: ServiceItem | null): Pr
             return await fetchCalendar(env, lastItem);
         } else if (isRssEnv(env)) {
             return await fetchRss(env, lastItem);
+        } else if(isLinearEnv(env)){
+            return await fetchLinear(env, lastItem);
         }
     } catch (error) {
         if (error instanceof RetryAbleError) {

@@ -19,6 +19,9 @@ I want to create sync DB for Bluesky or Twitter etc...
 - [GitHub Search](https://github.com/search)
     - Pull Issues/PRs or Repositories from GitHub Search and push to Notion
     - **Required**: need to setup `actions/cache` action to prevent duplicated items
+- [Linear](https://linear.app/)
+    - Assigned Issues and Created Issues
+    - **Required**: need to setup `actions/cache` action to prevent duplicated items
 - iCal calendar like [Google Calendar](https://calendar.google.com/)
     - Pull events from iCal and push to Notion
     - **Required**: need to setup `actions/cache` action to prevent duplicated items

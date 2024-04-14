@@ -115,6 +115,20 @@
         >
     </div>
     <div>
+        <h2>Linear Config</h2>
+        <p><a href="https://linear.app/">Linear</a> assigned/created issues</p>
+        <label for="linear_token">Linear Token Token:</label><br>
+        <input type="text" id="linear_token"
+               name="linear_token"
+               placeholder="lin_api_xxx"><br>
+        <!-- select "assigned_me" | "created_by_me" -->
+        <label for="linear_search_type">Linear Search Type:</label><br>
+        <select id="linear_search_type" name="linear_search_type">
+            <option value="assigned_me">assigned_me</option>
+            <option value="created_by_me">created_by_me</option>
+        </select>
+    </div>
+    <div>
         <h2>Calendar(iCal)</h2>
         <p>If you want to sync calendar, fill the iCal Url.</p>
         <label for="calendar_url">iCal URL:</label><br>
@@ -159,6 +173,13 @@
             'github_token___b',
             'github_search_query',
             'github_search_type'
+        ],
+        // Linear
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'linear_token',
+            'linear_search_type',
         ],
         // Calendar
         [
