@@ -21,6 +21,11 @@ export const createCache = <T>(cacheFileName: string) => {
         }
     }
     const write = async (cache: T[]) => {
+        // DRY run
+        if (process.env.BLUE_NOTION_DRY_RUN) {
+            debug("[DRY RUN] write cache", cache)
+            return;
+        }
         await fs.mkdir(CACHE_DIR, { recursive: true });
         const cachePath = path.join(CACHE_DIR, cacheFileName);
         debug("write cache", cache)
