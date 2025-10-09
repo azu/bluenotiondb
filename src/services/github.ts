@@ -84,6 +84,9 @@ const getStateEmoji = (state: string): string => {
 
 function compileFormPushEvent(event: any) {
     const commits = event.payload.commits;
+    if (!commits || !Array.isArray(commits)) {
+        return "";
+    }
     return commits.map(function (commit: any) {
         return "- " + commit.message;
     }).join("\n");
