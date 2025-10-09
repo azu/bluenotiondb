@@ -69,7 +69,10 @@ export const collectUntil = (events: Events, lastServiceItem: ServiceItem): Even
     }
     return filteredResults;
 };
-const getStateEmoji = (state: string): string => {
+const getStateEmoji = (state: string | undefined): string => {
+    if (!state) {
+        return "";
+    }
     switch (state.toUpperCase()) {
         case "OPEN":
         case "OPENED":
@@ -104,6 +107,9 @@ function parseEventTitle(event: Event) {
         } else {
             // @ts-expect-error
             const parsedEvent = parse(event);
+            if (!parsedEvent) {
+                return `${event.type} on ${event.repo.name}`;
+            }
             // @ts-expect-error
             return compile(parsedEvent);
         }
