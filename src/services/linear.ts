@@ -361,9 +361,7 @@ async function searchActivity({ token }: { token: string }): Promise<ServiceItem
         searchMyCreatedIssues({ token }),
     ]);
     // 全て結合して時間順にソート
-    const all = [...comments, ...history, ...created];
-    all.sort((a, b) => b.unixTimeMs - a.unixTimeMs);
-    return all;
+    return [...comments, ...history, ...created].toSorted((a, b) => b.unixTimeMs - a.unixTimeMs);
 }
 
 async function searchLinear({ type, token }: {
