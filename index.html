@@ -147,6 +147,25 @@
                placeholder="https://example.test/feed.rss"><br>
     </div>
     <div>
+        <h2>Location (Overland iOS)</h2>
+        <p>Sync location data from <a href="https://github.com/azu/blued-location">blued-location</a> API.</p>
+        <label for="location_api_url">Location API URL:</label><br>
+        <input type="text"
+               id="location_api_url"
+               name="location_api_url"
+               placeholder="https://your-domain.com/api/locations"><br>
+        <label for="location_api_token">Location API Token:</label><br>
+        <input type="text"
+               id="location_api_token"
+               name="location_api_token"
+               placeholder="your-api-token"><br>
+        <label for="location_device_id">Location Device ID (optional):</label><br>
+        <input type="text"
+               id="location_device_id"
+               name="location_device_id"
+               placeholder="device-id"><br>
+    </div>
+    <div>
         <h2>Generated env(click and copy)</h2>
         <textarea id="generated_env" cols="30" rows="10" readonly></textarea>
     </div>
@@ -193,6 +212,13 @@
             'notion_database_id',
             'notion_api_key',
             'rss_url',
+        ],
+        // Location
+        [
+            'notion_database_id',
+            'notion_api_key',
+            'location_api_url',
+            'location_api_token',
         ]
     ];
 
