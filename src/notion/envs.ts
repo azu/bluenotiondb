@@ -4,8 +4,9 @@ import { GitHubSearchEnv, GitHubSearchType, isGitHubSearchEnv } from "../service
 import { GitHubEnv, GitHubType, isGithubEnv } from "../services/github.js";
 import { CalendarEnv, CalendarType, isCalendarEnv } from "../services/calendar.js";
 import { isRssEnv, RssEnv, RSSType } from "../services/rss.js";
+import { isLinearEnv, LinearEnv, LinearType } from "../services/linear.js";
 
-export type SupportedEnv = BlueSkyEnv | GitHubEnv | GitHubSearchEnv | CalendarEnv | RssEnv;
+export type SupportedEnv = BlueSkyEnv | GitHubEnv | GitHubSearchEnv | CalendarEnv | RssEnv | LinearEnv;
 export const typeOfEnv = (env: SupportedEnv) => {
     // @ts-expect-error: notion_extra is not defined in SupportedEnv
     const notionExtraType = env.notion_extra?.Type.select?.name;
@@ -22,6 +23,8 @@ export const typeOfEnv = (env: SupportedEnv) => {
         return CalendarType;
     } else if (isRssEnv(env)) {
         return RSSType;
+    } else if (isLinearEnv(env)) {
+        return LinearType;
     }
     throw new Error("unknown env type" + (env as { Type: "invalid" }).Type);
 }
