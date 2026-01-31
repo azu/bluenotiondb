@@ -353,15 +353,16 @@ async function searchMyCreatedIssues({ token }: { token: string }): Promise<Serv
     });
 }
 
-// Activity: コメント + ステータス変更 + Issue作成を取得
+// Activity: コメント + ステータス変更 + Issue作成 + アサインされたIssueを取得
 async function searchActivity({ token }: { token: string }): Promise<ServiceItemWithId[]> {
-    const [comments, history, created] = await Promise.all([
+    const [comments, history, created, assigned] = await Promise.all([
         searchMyComments({ token }),
         searchMyIssueHistory({ token }),
         searchMyCreatedIssues({ token }),
+        searchAssignedIssues({ token }),
     ]);
     // 全て結合して時間順にソート
-    return [...comments, ...history, ...created].toSorted((a, b) => b.unixTimeMs - a.unixTimeMs);
+    return [...comments, ...history, ...created, ...assigned].toSorted((a, b) => b.unixTimeMs - a.unixTimeMs);
 }
 
 async function searchLinear({ type, token }: {
