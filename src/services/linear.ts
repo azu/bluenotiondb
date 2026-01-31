@@ -212,7 +212,7 @@ async function searchMyComments({ token }: { token: string }): Promise<ServiceIt
         return [{
             id: `comment-${node.id}`,
             type: LinearType,
-            title: `[Comment]${node.issue.title}: ${node.body}`,
+            title: `[Comment] ${node.issue.title}: ${node.body}`,
             url: node.issue.url,
             unixTimeMs: new Date(node.createdAt).getTime(),
         }];
@@ -273,7 +273,7 @@ async function searchMyIssueHistory({ token }: { token: string }): Promise<Servi
                 results.push({
                     id: `history-state-${history.id}`,
                     type: LinearType,
-                    title: `[Status]${issue.title}: ${history.fromState.name} → ${history.toState.name}`,
+                    title: `[Status] ${issue.title}: ${history.fromState.name} → ${history.toState.name}`,
                     url: issue.url,
                     unixTimeMs: new Date(history.createdAt).getTime(),
                 });
@@ -287,7 +287,7 @@ async function searchMyIssueHistory({ token }: { token: string }): Promise<Servi
                 results.push({
                     id: `history-assign-${history.id}`,
                     type: LinearType,
-                    title: `[Assign]${issue.title}: ${from} → ${to}`,
+                    title: `[Assign] ${issue.title}: ${from} → ${to}`,
                     url: issue.url,
                     unixTimeMs: new Date(history.createdAt).getTime(),
                 });
@@ -302,7 +302,7 @@ async function searchMyIssueHistory({ token }: { token: string }): Promise<Servi
                 results.push({
                     id: `history-priority-${history.id}`,
                     type: LinearType,
-                    title: `[Priority]${issue.title}: ${from} → ${to}`,
+                    title: `[Priority Change] ${issue.title}: ${from} → ${to}`,
                     url: issue.url,
                     unixTimeMs: new Date(history.createdAt).getTime(),
                 });
@@ -344,7 +344,7 @@ async function searchMyCreatedIssues({ token }: { token: string }): Promise<Serv
         return {
             id: `created-${node.id}`,
             type: LinearType,
-            title: `[Created]${node.title}`,
+            title: `[Created] ${node.title}`,
             url: node.url,
             unixTimeMs: new Date(node.createdAt).getTime(),
         };
