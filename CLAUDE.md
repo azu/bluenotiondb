@@ -8,10 +8,10 @@ BluenotionDB: 各種サービスをNotionにSync
 
 ```bash
 # テスト
-ni run test
+bun run test
 
 # Lint
-ni run lint
+bun run lint
 
 # dry-run（実際にNotionに書き込まない）
 op run --env-file .env -- bun run dry-run
