@@ -85,25 +85,139 @@ const getStateEmoji = (state: string | undefined): string => {
     return "";
 }
 
-function compileFormPushEvent(event: any) {
+async function fetchCommitMessage(
+    octokit: Octokit,
+    owner: string,
+    repo: string,
+    sha: string
+): Promise<string> {
+    try {
+        const response = await octokit.rest.repos.getCommit({
+            owner,
+            repo,
+            ref: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        return response.data.commit.message;
+    } catch (error) {
+        logger.error(new Error(`Failed to fetch commit message for ${sha}`, { cause: error }));
+        return "";
+    }
+}
+
+type PullRequestDetails = {
+    title: string;
+    body: string | null;
+    state: string;
+};
+
+async function fetchPullRequestDetails(
+    octokit: Octokit,
+    owner: string,
+    repo: string,
+    pull_number: number
+): Promise<PullRequestDetails | null> {
+    try {
+        const response = await octokit.rest.pulls.get({
+            owner,
+            repo,
+            pull_number,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        return {
+            title: response.data.title,
+            body: response.data.body,
+            state: response.data.merged ? "merged" : response.data.state
+        };
+    } catch (error) {
+        logger.error(new Error(`Failed to fetch PR #${pull_number}`, { cause: error }));
+        return null;
+    }
+}
+
+type IssueDetails = {
+    title: string;
+    body: string | null;
+    state: string;
+};
+
+async function fetchIssueDetails(
+    octokit: Octokit,
+    owner: string,
+    repo: string,
+    issue_number: number
+): Promise<IssueDetails | null> {
+    try {
+        const response = await octokit.rest.issues.get({
+            owner,
+            repo,
+            issue_number,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        return {
+            title: response.data.title,
+            body: response.data.body ?? null,
+            state: response.data.state ?? "open"
+        };
+    } catch (error) {
+        logger.error(new Error(`Failed to fetch issue #${issue_number}`, { cause: error }));
+        return null;
+    }
+}
+
+async function compileFormPushEvent(octokit: Octokit, event: any): Promise<string> {
     const commits = event.payload.commits;
     if (!commits || !Array.isArray(commits)) {
         return "";
     }
-    return commits.map(function (commit: any) {
-        return "- " + commit.message;
-    }).join("\n");
+    const repoFullName = event.repo.name;
+    const [owner, repo] = repoFullName.split('/');
+    const messages: string[] = [];
+    for (const commit of commits) {
+        if (commit.message) {
+            messages.push("- " + commit.message);
+        } else if (commit.sha) {
+            const message = await fetchCommitMessage(octokit, owner, repo, commit.sha);
+            if (message) {
+                messages.push("- " + message);
+            }
+        }
+    }
+    return messages.join("\n");
 }
 
-function parseEventTitle(event: Event) {
+async function parseEventTitle(octokit: Octokit, event: Event): Promise<string> {
+    const repoFullName = event.repo.name;
+    const [owner, repo] = repoFullName.split('/');
+
     if (event.payload.issue) {
-        // {state} {issue.title} on {repo.name}#{issue.number}
-        return `${getStateEmoji(event.payload.issue.state)} ${event.payload.issue.title} on ${event.repo.name}#${event.payload.issue.number}`;
+        const issue = event.payload.issue;
+        // Fetch from API if title is missing
+        if (!issue.title && issue.number) {
+            const details = await fetchIssueDetails(octokit, owner, repo, issue.number);
+            if (details) {
+                return `${getStateEmoji(details.state)} ${details.title} on ${event.repo.name}#${issue.number}`;
+            }
+        }
+        return `${getStateEmoji(issue.state)} ${issue.title} on ${event.repo.name}#${issue.number}`;
     } else { // @ts-expect-error
         if (event.payload.pull_request) {
-            // {state} {pull_request.title} on {repo.name}#{issue.number}
             // @ts-expect-error
-            return `${getStateEmoji(event.payload.pull_request.state)} ${event.payload.pull_request.title} on ${event.repo.name}#${event.payload.pull_request.number}`;
+            const pr = event.payload.pull_request;
+            // Fetch from API if title is missing
+            if (!pr.title && pr.number) {
+                const details = await fetchPullRequestDetails(octokit, owner, repo, pr.number);
+                if (details) {
+                    return `${getStateEmoji(details.state)} ${details.title} on ${event.repo.name}#${pr.number}`;
+                }
+            }
+            return `${getStateEmoji(pr.state)} ${pr.title} on ${event.repo.name}#${pr.number}`;
         } else {
             // @ts-expect-error
             const parsedEvent = parse(event);
@@ -116,26 +230,48 @@ function parseEventTitle(event: Event) {
     }
 }
 
-function parseEventBody(event: Event) {
+async function parseEventBody(octokit: Octokit, event: Event): Promise<string> {
     const payload = event.payload;
+    const repoFullName = event.repo.name;
+    const [owner, repo] = repoFullName.split('/');
+
     if (payload.comment) {
-        return payload.comment.body;
+        return payload.comment.body ?? "";
     } else if (payload.issue) {
-        return payload.issue.body;
+        if (payload.issue.body) {
+            return payload.issue.body;
+        }
+        // Fetch from API if body is missing
+        if (payload.issue.number) {
+            const details = await fetchIssueDetails(octokit, owner, repo, payload.issue.number);
+            return details?.body ?? "";
+        }
+        return "";
     } else if (event.type === "PushEvent") {
-        return compileFormPushEvent(event);
+        return compileFormPushEvent(octokit, event);
     } else { // @ts-expect-error
         if (payload.pull_request) {
             // @ts-expect-error
-            return payload.pull_request.body;
+            if (payload.pull_request.body) {
+                // @ts-expect-error
+                return payload.pull_request.body;
+            }
+            // Fetch from API if body is missing
+            // @ts-expect-error
+            if (payload.pull_request.number) {
+                // @ts-expect-error
+                const details = await fetchPullRequestDetails(octokit, owner, repo, payload.pull_request.number);
+                return details?.body ?? "";
+            }
+            return "";
         }
     }
     return "";
 }
 
-const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
-    const title = parseEventTitle(result);
-    const body = parseEventBody(result);
+const convertSearchResultToServiceItem = async (octokit: Octokit, result: Event): Promise<ServiceItem> => {
+    const title = await parseEventTitle(octokit, result);
+    const body = await parseEventBody(octokit, result);
     // @ts-expect-error
     const parsed = parse(result);
     return {
@@ -146,6 +282,9 @@ const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
     }
 }
 export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
+    const octokit = new Octokit({
+        auth: env.github_token,
+    });
     // fetch
     const events = await fetchUserEvents({
         github_username: env.github_username,
@@ -157,6 +296,11 @@ export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: Service
         ? collectUntil(events, lastServiceItem)
         : events;
     logger.info("filtered GitHub Events count", filteredResults.length)
-    // convert
-    return filteredResults.map(convertSearchResultToServiceItem);
+    // convert (sequential to avoid rate limiting)
+    const serviceItems: ServiceItem[] = [];
+    for (const event of filteredResults) {
+        const item = await convertSearchResultToServiceItem(octokit, event);
+        serviceItems.push(item);
+    }
+    return serviceItems;
 }
