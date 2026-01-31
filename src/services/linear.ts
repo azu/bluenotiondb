@@ -207,18 +207,17 @@ async function searchMyComments({ token }: { token: string }): Promise<ServiceIt
         logger.warn("comments query failed, trying fallback", json.errors);
         return [];
     }
-    return json.data.comments.nodes
-        .filter((node) => node.issue !== null)
-        .map((node) => {
-            const bodyPreview = node.body.length > 100 ? node.body.slice(0, 100) + "..." : node.body;
-            return {
-                id: `comment-${node.id}`,
-                type: LinearType,
-                title: `💬 ${node.issue!.title}: ${bodyPreview}`,
-                url: node.issue!.url,
-                unixTimeMs: new Date(node.createdAt).getTime(),
-            };
-        });
+    return json.data.comments.nodes.flatMap((node) => {
+        if (node.issue === null) return [];
+        const bodyPreview = node.body.length > 100 ? node.body.slice(0, 100) + "..." : node.body;
+        return [{
+            id: `comment-${node.id}`,
+            type: LinearType,
+            title: `💬 ${node.issue.title}: ${bodyPreview}`,
+            url: node.issue.url,
+            unixTimeMs: new Date(node.createdAt).getTime(),
+        }];
+    });
 }
 
 // Activity: IssueのHistory（ステータス変更、アサイン変更、優先度変更など）を取得
@@ -382,7 +381,7 @@ async function searchLinear({ type, token }: {
 export const fetchLinear = async (env: LinearEnv, _lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
     const searchResults = await searchLinear({
         type: env.linear_search_type,
-        token: env.linear_token!,
+        token: env.linear_token,
     });
     const cache = createCache<ServiceItemWithId>("linear.json");
     const cachedEvents = await cache.read();
