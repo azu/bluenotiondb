@@ -6,27 +6,91 @@ import { createCache } from "../common/cache.ts";
 const logger = createLogger("Linear");
 export type LinearEnv = {
     linear_token: string;
-    linear_search_type: "assigned_me" | "created_by_me";
+    linear_search_type: "assigned_me" | "created_by_me" | "activity";
 } & NotionEnv;
 export const LinearType = "Linear" as const;
 export const isLinearEnv = (env: any): env is LinearEnv => {
     return typeof env.linear_token === "string" && typeof env.linear_search_type === "string";
 }
 type ServiceItemWithId = ServiceItem & { id: string };
+type IssueNode = {
+    id: string;
+    title: string;
+    url: string;
+    updatedAt: string; // ISO8601
+    createdAt: string; // ISO8601
+};
 type searchAssignedIssuesResponse = {
     data: {
         viewer: {
             assignedIssues: {
-                nodes: {
-                    id: string;
-                    title: string;
-                    url: string;
-                    updatedAt: string;//ISO8601
-                }[]
-            }
-        }
-    }
-}
+                nodes: IssueNode[];
+            };
+        };
+    };
+};
+type searchCreatedIssuesResponse = {
+    data: {
+        viewer: {
+            createdIssues: {
+                nodes: IssueNode[];
+            };
+        };
+    };
+};
+
+// Activity related types
+type CommentNode = {
+    id: string;
+    body: string;
+    createdAt: string;
+    issue: {
+        id: string;
+        title: string;
+        url: string;
+    } | null;
+};
+type CommentsResponse = {
+    data: {
+        comments: {
+            nodes: CommentNode[];
+        };
+    };
+    errors?: Array<{ message: string }>;
+};
+type HistoryNode = {
+    id: string;
+    createdAt: string;
+    actor: {
+        id: string;
+        isMe: boolean;
+        name: string;
+    } | null;
+    fromState: { name: string } | null;
+    toState: { name: string } | null;
+    fromAssignee: { name: string } | null;
+    toAssignee: { name: string } | null;
+    fromPriority: number | null;
+    toPriority: number | null;
+};
+type IssueWithHistory = {
+    id: string;
+    title: string;
+    url: string;
+    history: {
+        nodes: HistoryNode[];
+    };
+};
+type IssueHistoryResponse = {
+    data: {
+        viewer: {
+            assignedIssues: {
+                nodes: IssueWithHistory[];
+            };
+        };
+    };
+    errors?: Array<{ message: string }>;
+};
 async function searchAssignedIssues({ token }: { token: string }): Promise<ServiceItemWithId[]> {
     // graphql req
     const res = await fetch("https://api.linear.app/graphql", {
@@ -72,7 +136,6 @@ async function searchAssignedIssues({ token }: { token: string }): Promise<Servi
 }
 
 async function searchCreatedByMe({ token }: { token: string }): Promise<ServiceItemWithId[]> {
-    // graphql req
     const res = await fetch("https://api.linear.app/graphql", {
         method: "POST",
         headers: {
@@ -103,17 +166,201 @@ async function searchCreatedByMe({ token }: { token: string }): Promise<ServiceI
     if (!res.ok) {
         throw new Error("failed to fetch linear issues");
     }
-    const json = await res.json() as searchAssignedIssuesResponse;
-    return json.data.viewer.assignedIssues.nodes.map((node) => {
+    const json = await res.json() as searchCreatedIssuesResponse;
+    return json.data.viewer.createdIssues.nodes.map((node) => {
         return {
             id: node.id,
             type: LinearType,
             title: node.title,
             url: node.url,
             unixTimeMs: new Date(node.updatedAt).getTime(),
-        }
+        };
     });
+}
 
+// Activity: 自分のコメントを取得
+async function searchMyComments({ token }: { token: string }): Promise<ServiceItemWithId[]> {
+    const res = await fetch("https://api.linear.app/graphql", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${token}`,
+        },
+        body: JSON.stringify({
+            query: `query {
+  comments(filter: { user: { isMe: { eq: true } } }, first: 50, orderBy: createdAt) {
+    nodes {
+      id
+      body
+      createdAt
+      issue { id title url }
+    }
+  }
+}`
+        })
+    });
+    if (!res.ok) {
+        throw new Error("failed to fetch linear comments");
+    }
+    const json = await res.json() as CommentsResponse;
+    if (json.errors) {
+        logger.warn("comments query failed, trying fallback", json.errors);
+        return [];
+    }
+    return json.data.comments.nodes.flatMap((node) => {
+        if (node.issue === null) return [];
+        return [{
+            id: `comment-${node.id}`,
+            type: LinearType,
+            title: `[Comment] ${node.issue.title}: ${node.body}`,
+            url: node.issue.url,
+            unixTimeMs: new Date(node.createdAt).getTime(),
+        }];
+    });
+}
+
+// Activity: IssueのHistory（ステータス変更、アサイン変更、優先度変更など）を取得
+async function searchMyIssueHistory({ token }: { token: string }): Promise<ServiceItemWithId[]> {
+    const res = await fetch("https://api.linear.app/graphql", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${token}`,
+        },
+        body: JSON.stringify({
+            query: `query {
+  viewer {
+    assignedIssues(first: 20, orderBy: updatedAt) {
+      nodes {
+        id
+        title
+        url
+        history(first: 10) {
+          nodes {
+            id
+            createdAt
+            actor { id isMe name }
+            fromState { name }
+            toState { name }
+            fromAssignee { name }
+            toAssignee { name }
+            fromPriority
+            toPriority
+          }
+        }
+      }
+    }
+  }
+}`
+        })
+    });
+    if (!res.ok) {
+        throw new Error("failed to fetch linear issue history");
+    }
+    const json = await res.json() as IssueHistoryResponse;
+    if (json.errors) {
+        logger.warn("issue history query failed", json.errors);
+        return [];
+    }
+    const results: ServiceItemWithId[] = [];
+    for (const issue of json.data.viewer.assignedIssues.nodes) {
+        for (const history of issue.history.nodes) {
+            // 自分のアクションのみ
+            if (!history.actor?.isMe) continue;
+
+            // ステータス変更
+            if (history.fromState && history.toState) {
+                results.push({
+                    id: `history-state-${history.id}`,
+                    type: LinearType,
+                    title: `[Status] ${issue.title}: ${history.fromState.name} → ${history.toState.name}`,
+                    url: issue.url,
+                    unixTimeMs: new Date(history.createdAt).getTime(),
+                });
+                continue;
+            }
+
+            // アサイン変更
+            if (history.fromAssignee || history.toAssignee) {
+                const from = history.fromAssignee?.name ?? "Unassigned";
+                const to = history.toAssignee?.name ?? "Unassigned";
+                results.push({
+                    id: `history-assign-${history.id}`,
+                    type: LinearType,
+                    title: `[Assign] ${issue.title}: ${from} → ${to}`,
+                    url: issue.url,
+                    unixTimeMs: new Date(history.createdAt).getTime(),
+                });
+                continue;
+            }
+
+            // 優先度変更
+            if (history.fromPriority !== null || history.toPriority !== null) {
+                const priorityLabels = ["None", "Urgent", "High", "Medium", "Low"];
+                const from = priorityLabels[history.fromPriority ?? 0] ?? String(history.fromPriority);
+                const to = priorityLabels[history.toPriority ?? 0] ?? String(history.toPriority);
+                results.push({
+                    id: `history-priority-${history.id}`,
+                    type: LinearType,
+                    title: `[Priority Change] ${issue.title}: ${from} → ${to}`,
+                    url: issue.url,
+                    unixTimeMs: new Date(history.createdAt).getTime(),
+                });
+                continue;
+            }
+        }
+    }
+    return results;
+}
+
+// Activity: 自分が作成したIssueを取得
+async function searchMyCreatedIssues({ token }: { token: string }): Promise<ServiceItemWithId[]> {
+    const res = await fetch("https://api.linear.app/graphql", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${token}`,
+        },
+        body: JSON.stringify({
+            query: `query {
+  viewer {
+    createdIssues(first: 20, orderBy: createdAt) {
+      nodes {
+        id
+        title
+        url
+        createdAt
+      }
+    }
+  }
+}`
+        })
+    });
+    if (!res.ok) {
+        throw new Error("failed to fetch linear created issues");
+    }
+    const json = await res.json() as searchCreatedIssuesResponse;
+    return json.data.viewer.createdIssues.nodes.map((node) => {
+        return {
+            id: `created-${node.id}`,
+            type: LinearType,
+            title: `[Created] ${node.title}`,
+            url: node.url,
+            unixTimeMs: new Date(node.createdAt).getTime(),
+        };
+    });
+}
+
+// Activity: コメント + ステータス変更 + Issue作成 + アサインされたIssueを取得
+async function searchActivity({ token }: { token: string }): Promise<ServiceItemWithId[]> {
+    const [comments, history, created, assigned] = await Promise.all([
+        searchMyComments({ token }),
+        searchMyIssueHistory({ token }),
+        searchMyCreatedIssues({ token }),
+        searchAssignedIssues({ token }),
+    ]);
+    // 全て結合して時間順にソート
+    return [...comments, ...history, ...created, ...assigned].toSorted((a, b) => b.unixTimeMs - a.unixTimeMs);
 }
 
 async function searchLinear({ type, token }: {
@@ -124,6 +371,8 @@ async function searchLinear({ type, token }: {
         return searchAssignedIssues({ token });
     } else if (type === "created_by_me") {
         return searchCreatedByMe({ token });
+    } else if (type === "activity") {
+        return searchActivity({ token });
     }
     throw new Error("invalid type: " + (type satisfies never));
 }
@@ -131,7 +380,7 @@ async function searchLinear({ type, token }: {
 export const fetchLinear = async (env: LinearEnv, _lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
     const searchResults = await searchLinear({
         type: env.linear_search_type,
-        token: env.linear_token!,
+        token: env.linear_token,
     });
     const cache = createCache<ServiceItemWithId>("linear.json");
     const cachedEvents = await cache.read();
