@@ -300,7 +300,6 @@ export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: Service
     const serviceItems: ServiceItem[] = [];
     for (const event of filteredResults) {
         const item = await convertSearchResultToServiceItem(octokit, event);
-        logger.info("converted item", { type: event.type, title: item.title.substring(0, 200) });
         serviceItems.push(item);
     }
     return serviceItems;
