@@ -85,14 +85,47 @@ const getStateEmoji = (state: string | undefined): string => {
     return "";
 }
 
-function compileFormPushEvent(event: any) {
+async function fetchCommitMessage(
+    octokit: Octokit,
+    owner: string,
+    repo: string,
+    sha: string
+): Promise<string> {
+    try {
+        const response = await octokit.rest.repos.getCommit({
+            owner,
+            repo,
+            ref: sha,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        return response.data.commit.message;
+    } catch (error) {
+        logger.error(new Error(`Failed to fetch commit message for ${sha}`, { cause: error }));
+        return "";
+    }
+}
+
+async function compileFormPushEvent(octokit: Octokit, event: any): Promise<string> {
     const commits = event.payload.commits;
     if (!commits || !Array.isArray(commits)) {
         return "";
     }
-    return commits.map(function (commit: any) {
-        return "- " + commit.message;
-    }).join("\n");
+    const repoFullName = event.repo.name;
+    const [owner, repo] = repoFullName.split('/');
+    const messages: string[] = [];
+    for (const commit of commits) {
+        if (commit.message) {
+            messages.push("- " + commit.message);
+        } else if (commit.sha) {
+            const message = await fetchCommitMessage(octokit, owner, repo, commit.sha);
+            if (message) {
+                messages.push("- " + message);
+            }
+        }
+    }
+    return messages.join("\n");
 }
 
 function parseEventTitle(event: Event) {
@@ -116,26 +149,26 @@ function parseEventTitle(event: Event) {
     }
 }
 
-function parseEventBody(event: Event) {
+async function parseEventBody(octokit: Octokit, event: Event): Promise<string> {
     const payload = event.payload;
     if (payload.comment) {
-        return payload.comment.body;
+        return payload.comment.body ?? "";
     } else if (payload.issue) {
-        return payload.issue.body;
+        return payload.issue.body ?? "";
     } else if (event.type === "PushEvent") {
-        return compileFormPushEvent(event);
+        return compileFormPushEvent(octokit, event);
     } else { // @ts-expect-error
         if (payload.pull_request) {
             // @ts-expect-error
-            return payload.pull_request.body;
+            return payload.pull_request.body ?? "";
         }
     }
     return "";
 }
 
-const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
+const convertSearchResultToServiceItem = async (octokit: Octokit, result: Event): Promise<ServiceItem> => {
     const title = parseEventTitle(result);
-    const body = parseEventBody(result);
+    const body = await parseEventBody(octokit, result);
     // @ts-expect-error
     const parsed = parse(result);
     return {
@@ -146,6 +179,9 @@ const convertSearchResultToServiceItem = (result: Event): ServiceItem => {
     }
 }
 export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: ServiceItem | null): Promise<ServiceItem[]> => {
+    const octokit = new Octokit({
+        auth: env.github_token,
+    });
     // fetch
     const events = await fetchUserEvents({
         github_username: env.github_username,
@@ -157,6 +193,11 @@ export const fetchGitHubEvents = async (env: GitHubEnv, lastServiceItem: Service
         ? collectUntil(events, lastServiceItem)
         : events;
     logger.info("filtered GitHub Events count", filteredResults.length)
-    // convert
-    return filteredResults.map(convertSearchResultToServiceItem);
+    // convert (sequential to avoid rate limiting)
+    const serviceItems: ServiceItem[] = [];
+    for (const event of filteredResults) {
+        const item = await convertSearchResultToServiceItem(octokit, event);
+        serviceItems.push(item);
+    }
+    return serviceItems;
 }
