@@ -282,8 +282,8 @@ async function searchMyIssueHistory({ token }: { token: string }): Promise<Servi
 
             // アサイン変更
             if (history.fromAssignee || history.toAssignee) {
-                const from = history.fromAssignee?.name ?? "未割り当て";
-                const to = history.toAssignee?.name ?? "未割り当て";
+                const from = history.fromAssignee?.name ?? "Unassigned";
+                const to = history.toAssignee?.name ?? "Unassigned";
                 results.push({
                     id: `history-assign-${history.id}`,
                     type: LinearType,
@@ -296,7 +296,7 @@ async function searchMyIssueHistory({ token }: { token: string }): Promise<Servi
 
             // 優先度変更
             if (history.fromPriority !== null || history.toPriority !== null) {
-                const priorityLabels = ["なし", "Urgent", "High", "Medium", "Low"];
+                const priorityLabels = ["None", "Urgent", "High", "Medium", "Low"];
                 const from = priorityLabels[history.fromPriority ?? 0] ?? String(history.fromPriority);
                 const to = priorityLabels[history.toPriority ?? 0] ?? String(history.toPriority);
                 results.push({
