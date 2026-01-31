@@ -209,11 +209,10 @@ async function searchMyComments({ token }: { token: string }): Promise<ServiceIt
     }
     return json.data.comments.nodes.flatMap((node) => {
         if (node.issue === null) return [];
-        const bodyPreview = node.body.length > 100 ? node.body.slice(0, 100) + "..." : node.body;
         return [{
             id: `comment-${node.id}`,
             type: LinearType,
-            title: `💬 ${node.issue.title}: ${bodyPreview}`,
+            title: `💬 ${node.issue.title}: ${node.body}`,
             url: node.issue.url,
             unixTimeMs: new Date(node.createdAt).getTime(),
         }];
