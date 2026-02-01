@@ -48,9 +48,7 @@ type CacheItem = {
 };
 
 const formatCoordinate = (lat: number, lon: number): string => {
-    const latDir = lat >= 0 ? "N" : "S";
-    const lonDir = lon >= 0 ? "E" : "W";
-    return `${Math.abs(lat)}${latDir}, ${Math.abs(lon)}${lonDir}`;
+    return `${lat}, ${lon}`;
 };
 
 const formatSpeed = (speedMps: number | undefined): string => {
