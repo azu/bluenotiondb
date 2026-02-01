@@ -173,22 +173,30 @@ async function fetchIssueDetails(
 
 async function compileFormPushEvent(octokit: Octokit, event: any): Promise<string> {
     const commits = event.payload.commits;
-    if (!commits || !Array.isArray(commits)) {
-        return "";
-    }
     const repoFullName = event.repo.name;
     const [owner, repo] = repoFullName.split('/');
     const messages: string[] = [];
-    for (const commit of commits) {
-        if (commit.message) {
-            messages.push("- " + commit.message);
-        } else if (commit.sha) {
-            const message = await fetchCommitMessage(octokit, owner, repo, commit.sha);
-            if (message) {
-                messages.push("- " + message);
+
+    // commits が存在する場合は従来通り処理
+    if (commits && Array.isArray(commits) && commits.length > 0) {
+        for (const commit of commits) {
+            if (commit.message) {
+                messages.push("- " + commit.message);
+            } else if (commit.sha) {
+                const message = await fetchCommitMessage(octokit, owner, repo, commit.sha);
+                if (message) {
+                    messages.push("- " + message);
+                }
             }
         }
+    } else if (event.payload.head) {
+        // commits が null の場合は head SHA からコミットメッセージを取得
+        const message = await fetchCommitMessage(octokit, owner, repo, event.payload.head);
+        if (message) {
+            messages.push("- " + message);
+        }
     }
+
     return messages.join("\n");
 }
 
