@@ -50,7 +50,7 @@ type CacheItem = {
 const formatCoordinate = (lat: number, lon: number): string => {
     const latDir = lat >= 0 ? "N" : "S";
     const lonDir = lon >= 0 ? "E" : "W";
-    return `${Math.abs(lat).toFixed(2)}${latDir}, ${Math.abs(lon).toFixed(2)}${lonDir}`;
+    return `${Math.abs(lat)}${latDir}, ${Math.abs(lon)}${lonDir}`;
 };
 
 const formatSpeed = (speedMps: number | undefined): string => {
