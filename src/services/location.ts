@@ -48,7 +48,7 @@ type CacheItem = {
 };
 
 const formatCoordinate = (lat: number, lon: number): string => {
-    return `${lat}, ${lon}`;
+    return `lat:${lat}, lon:${lon}`;
 };
 
 const formatSpeed = (speedMps: number | undefined): string => {
