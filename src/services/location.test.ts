@@ -121,9 +121,9 @@ describe("fetchLocation", () => {
 
         expect(result.length).toBe(2);
 
-        // First item - Tokyo with POI and speed
+        // First item - Tokyo with address, POI and speed
         expect(result[0].type).toBe(LocationType);
-        expect(result[0].title).toBe("東京駅: lat:35.6812, lon:139.7671 (5.2km/h)");
+        expect(result[0].title).toBe("東京都千代田区丸の内1丁目 東京駅: lat:35.6812, lon:139.7671 (5.2km/h)");
         expect(result[0].url).toBe("https://www.google.com/maps?q=35.6812,139.7671");
         expect(result[0].unixTimeMs).toBe(new Date("2024-01-15T10:30:00Z").getTime());
 
@@ -264,7 +264,7 @@ describe("fetchLocation", () => {
         expect(result[0].title).toBe("Location: lat:0, lon:0");
     });
 
-    test("uses POI name as title prefix when available", async () => {
+    test("uses address and POI as title prefix when both available", async () => {
         const response = {
             type: "FeatureCollection",
             features: [
@@ -293,7 +293,7 @@ describe("fetchLocation", () => {
 
         const result = await fetchLocation(mockEnv, null);
 
-        expect(result[0].title).toBe("大阪城: lat:34.6937, lon:135.5023");
+        expect(result[0].title).toBe("大阪府大阪市中央区大阪城1-1 大阪城: lat:34.6937, lon:135.5023");
         expect(result[0].url).toBe("https://www.google.com/maps?q=34.6937,135.5023");
     });
 
@@ -329,7 +329,7 @@ describe("fetchLocation", () => {
         expect(result[0].title).toBe("新宿駅: lat:35.6895, lon:139.6917 (10.0km/h)");
     });
 
-    test("falls back to Location when POI is not available", async () => {
+    test("uses address when POI is not available", async () => {
         const response = {
             type: "FeatureCollection",
             features: [
@@ -341,7 +341,7 @@ describe("fetchLocation", () => {
                     },
                     properties: {
                         timestamp: "2024-01-15T12:00:00Z",
-                        address: "Some address without POI",
+                        address: "東京都港区南麻布",
                         // No poi field
                     },
                 },
@@ -358,6 +358,6 @@ describe("fetchLocation", () => {
 
         const result = await fetchLocation(mockEnv, null);
 
-        expect(result[0].title).toBe("Location: lat:36, lon:140");
+        expect(result[0].title).toBe("東京都港区南麻布: lat:36, lon:140");
     });
 });
