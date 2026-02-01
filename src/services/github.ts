@@ -277,15 +277,50 @@ async function parseEventBody(octokit: Octokit, event: Event): Promise<string> {
     return "";
 }
 
+function buildEventUrl(event: Event): string {
+    const repoName = event.repo.name;
+    const payload = event.payload;
+
+    // PullRequestEvent
+    // @ts-expect-error
+    if (payload.pull_request?.number) {
+        // @ts-expect-error
+        return `https://github.com/${repoName}/pull/${payload.pull_request.number}`;
+    }
+
+    // IssuesEvent / IssueCommentEvent
+    if (payload.issue?.number) {
+        return `https://github.com/${repoName}/issues/${payload.issue.number}`;
+    }
+
+    // PushEvent
+    // @ts-expect-error
+    if (event.type === "PushEvent" && payload.head) {
+        // @ts-expect-error
+        return `https://github.com/${repoName}/commit/${payload.head}`;
+    }
+
+    // ReleaseEvent
+    // @ts-expect-error
+    if (payload.release?.html_url) {
+        // @ts-expect-error
+        return payload.release.html_url;
+    }
+
+    // fallback: parse-github-event or repo URL
+    // @ts-expect-error
+    const parsed = parse(event);
+    return parsed?.html_url ?? `https://github.com/${repoName}`;
+}
+
 const convertSearchResultToServiceItem = async (octokit: Octokit, result: Event): Promise<ServiceItem> => {
     const title = await parseEventTitle(octokit, result);
     const body = await parseEventBody(octokit, result);
-    // @ts-expect-error
-    const parsed = parse(result);
+    const url = buildEventUrl(result);
     return {
         type: GitHubType,
         title: body ? `${title}\n\n${body}` : title,
-        url: parsed?.html_url ?? "https://",
+        url,
         unixTimeMs: result.created_at ? new Date(result.created_at).getTime() : 0,
     }
 }
