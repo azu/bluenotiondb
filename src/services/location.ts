@@ -34,6 +34,8 @@ type GeoJSONFeature = {
         altitude?: number;
         horizontal_accuracy?: number;
         vertical_accuracy?: number;
+        address?: string;
+        poi?: string;
     };
 };
 
@@ -88,7 +90,9 @@ const convertFeatureToServiceItem = (feature: GeoJSONFeature): ServiceItem => {
     const [lon, lat] = feature.geometry.coordinates;
     const coords = formatCoordinate(lat, lon);
     const speed = formatSpeed(feature.properties.speed);
-    const title = `Location: ${coords}${speed}`;
+    const poi = feature.properties.poi;
+    // POIがある場合は「POI名: 座標」、ない場合は「Location: 座標」
+    const title = poi ? `${poi}: ${coords}${speed}` : `Location: ${coords}${speed}`;
     const url = createGoogleMapsUrl(lat, lon);
     const unixTimeMs = new Date(feature.properties.timestamp).getTime();
 
