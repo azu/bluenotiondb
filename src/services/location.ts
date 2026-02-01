@@ -112,6 +112,14 @@ export const fetchLocation = async (
     }
     url.searchParams.set("format", "geojson");
 
+    // Use from/to parameters to filter by time range (ISO 8601 format)
+    const now = new Date();
+    const fromDate = lastServiceItem
+        ? new Date(lastServiceItem.unixTimeMs)
+        : new Date(now.getTime() - 24 * 60 * 60 * 1000); // Default: 24 hours ago
+    url.searchParams.set("from", fromDate.toISOString());
+    url.searchParams.set("to", now.toISOString());
+
     const response = await fetch(url.toString(), {
         headers: {
             Authorization: `Bearer ${env.location_api_token}`,
@@ -129,12 +137,13 @@ export const fetchLocation = async (
     const oldItems = await cache.read();
     const oldItemIds = new Set(oldItems.map((item) => item.id));
 
-    // Filter out already cached items and items older than lastServiceItem
+    // Filter out already cached items (API already filters by time via from parameter)
     const newFeatures = data.features.filter((feature) => {
         const id = createLocationId(feature);
         if (oldItemIds.has(id)) {
             return false;
         }
+        // Double-check time filter in case API returns boundary items
         if (lastServiceItem) {
             const featureTime = new Date(feature.properties.timestamp).getTime();
             if (featureTime <= lastServiceItem.unixTimeMs) {

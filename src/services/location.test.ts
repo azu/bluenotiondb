@@ -151,7 +151,7 @@ describe("fetchLocation", () => {
         expect(callUrl).toContain("device_id=my-device");
     });
 
-    test("filters items older than lastServiceItem", async () => {
+    test("adds from parameter with ISO 8601 format when lastServiceItem exists", async () => {
         const mockFetch = mock(() =>
             Promise.resolve({
                 ok: true,
@@ -168,9 +168,52 @@ describe("fetchLocation", () => {
 
         const result = await fetchLocation(mockEnv, lastItem);
 
+        // Check that from parameter is set with ISO 8601 format
+        const callUrl = mockFetch.mock.calls[0][0] as string;
+        expect(callUrl).toContain("from=2024-01-15T10%3A45%3A00.000Z");
+
         // Only the second item (11:00) should be returned
         expect(result.length).toBe(1);
         expect(result[0].title).toBe("Location: 37.77N, 122.42W");
+    });
+
+    test("uses 24 hours ago as default from when lastServiceItem is null", async () => {
+        const mockFetch = mock(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(mockGeoJSONResponse),
+            } as Response)
+        );
+        globalThis.fetch = mockFetch;
+
+        await fetchLocation(mockEnv, null);
+
+        const callUrl = mockFetch.mock.calls[0][0] as string;
+        // Should have both from and to parameters
+        expect(callUrl).toContain("from=");
+        expect(callUrl).toContain("to=");
+    });
+
+    test("always includes from and to parameters", async () => {
+        const mockFetch = mock(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(mockGeoJSONResponse),
+            } as Response)
+        );
+        globalThis.fetch = mockFetch;
+
+        const lastItem = {
+            type: LocationType,
+            title: "Previous location",
+            unixTimeMs: new Date("2024-01-15T10:45:00Z").getTime(),
+        };
+
+        await fetchLocation(mockEnv, lastItem);
+
+        const callUrl = mockFetch.mock.calls[0][0] as string;
+        expect(callUrl).toContain("from=2024-01-15T10%3A45%3A00.000Z");
+        expect(callUrl).toContain("to=");
     });
 
     test("throws error on API failure", async () => {
