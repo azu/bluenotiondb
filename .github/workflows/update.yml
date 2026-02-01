@@ -5,7 +5,7 @@ on:
     - cron: "*/30 0-16,22-23 * * *"
   workflow_dispatch:
 env:
-  BLUENOTION_VERSION: v2.4.0
+  BLUENOTION_VERSION: v2.5.0
 
 permissions:
   contents: none
