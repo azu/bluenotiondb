@@ -121,13 +121,13 @@ describe("fetchLocation", () => {
 
         // First item - Tokyo with speed
         expect(result[0].type).toBe(LocationType);
-        expect(result[0].title).toBe("Location: 35.68N, 139.77E (5.2km/h)");
+        expect(result[0].title).toBe("Location: lat:35.6812, lon:139.7671 (5.2km/h)");
         expect(result[0].url).toBe("https://www.google.com/maps?q=35.6812,139.7671");
         expect(result[0].unixTimeMs).toBe(new Date("2024-01-15T10:30:00Z").getTime());
 
         // Second item - San Francisco without speed
         expect(result[1].type).toBe(LocationType);
-        expect(result[1].title).toBe("Location: 37.77N, 122.42W");
+        expect(result[1].title).toBe("Location: lat:37.7749, lon:-122.4194");
         expect(result[1].url).toBe("https://www.google.com/maps?q=37.7749,-122.4194");
     });
 
@@ -174,7 +174,7 @@ describe("fetchLocation", () => {
 
         // Only the second item (11:00) should be returned
         expect(result.length).toBe(1);
-        expect(result[0].title).toBe("Location: 37.77N, 122.42W");
+        expect(result[0].title).toBe("Location: lat:37.7749, lon:-122.4194");
     });
 
     test("uses 24 hours ago as default from when lastServiceItem is null", async () => {
@@ -259,6 +259,6 @@ describe("fetchLocation", () => {
 
         const result = await fetchLocation(mockEnv, null);
 
-        expect(result[0].title).toBe("Location: 0.00N, 0.00E");
+        expect(result[0].title).toBe("Location: lat:0, lon:0");
     });
 });
