@@ -21,8 +21,3 @@ jobs:
         run: bun install
       - name: Test
         run: bun run test
-      - name: Update
-        run: bun run ci:dry-run
-        env:
-          BLUE_NOTION_DRY_RUN: true
-          BLUENOTION_ENVS: ${{ secrets.BLUE_NOTION_ENVS_TEST }}
